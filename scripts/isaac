@@ -59,9 +59,9 @@ launch_isaac() {
 }
 
 # Update the urdf file before launching
-if [ -d /workspaces/offseason2023/install ]; then
-    source /workspaces/offseason2023/install/setup.bash
-    xacro /workspaces/offseason2023/src/edna_description/urdf/robots/edna.urdf.xacro > /workspaces/offseason2023/src/edna_description/urdf/edna.urdf namespace:=$ROS_NAMESPACE
+if [ -d /workspaces/roboeagles2024/install ]; then
+    source /workspaces/roboeagles2024/install/setup.bash
+    xacro /workspaces/roboeagles2024/src/edna_description/urdf/robots/edna.urdf.xacro > /workspaces/roboeagles2024/src/edna_description/urdf/edna.urdf namespace:=$ROS_NAMESPACE
 fi
 
 # Check if an isaac container already exists
