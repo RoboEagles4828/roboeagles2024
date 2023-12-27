@@ -1,3 +1,3 @@
 #!/bin/bash
-cd /home/sorineagle/offseason2023/
+cd /home/sorineagle/roboeagles2024/
 docker compose up

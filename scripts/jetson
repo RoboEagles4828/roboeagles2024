@@ -1,13 +1,13 @@
 #!/usr/bin/bash
 restart() {
     echo "Restarting..."
-    cd ~/offseason2023/
+    cd ~/roboeagles2024/
     docker compose restart
 }
 
 log() {
     echo "Logging..."
-    cd ~/offseason2023/
+    cd ~/roboeagles2024/
     if [ "$1" == "N" ]; then
         echo "Not Following logs..."
         docker compose logs
@@ -19,30 +19,30 @@ log() {
 
 jetson-kill() {
     echo "Killing..."
-    cd ~/offseason2023/
+    cd ~/roboeagles2024/
     docker compose kill
 }
 
 stop() {
     echo "Stopping..."
-    cd ~/offseason2023/
+    cd ~/roboeagles2024/
     docker compose stop
 }
 
 jetson-start() {
     echo "Starting..."
-    cd ~/offseason2023/
+    cd ~/roboeagles2024/
     docker compose up -d --remove-orphans
 }
 
 container-debug() {
     echo "Starting ROS Debug..."
-    docker exec -it $(docker ps -aqf "name=offseason2023-main_control-1") bash
+    docker exec -it $(docker ps -aqf "name=roboeagles2024-main_control-1") bash
 }
 
 edit() {
     echo "Editing..."
-    cd ~/offseason2023/
+    cd ~/roboeagles2024/
     nano docker-compose.yml
 }
 

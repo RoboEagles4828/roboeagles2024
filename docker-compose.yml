@@ -17,7 +17,7 @@ services:
     working_dir: /opt/workspace
     user: admin
     volumes:
-    - ${HOME}/offseason2023:/opt/workspace
+    - ${HOME}/roboeagles2024:/opt/workspace
   zed_cam:
     image: ghcr.io/roboeagles4828/jetson-zed:2
     network_mode: "host"
@@ -43,10 +43,10 @@ services:
       - /opt/nvidia/vpi2:/opt/nvidia/vpi2
       - /usr/share/vpi2:/usr/share/vpi2
       - /dev/*:/dev/*
-      - ${HOME}/offseason2023/src/edna_bringup/config/zed_config-common-custom-box.yaml:/root/ros2_ws/src/zed-ros2-wrapper/zed_wrapper/config/common.yaml
-      - ${HOME}/offseason2023/model.engine:/root/ros2_ws/model.engine
-      - ${HOME}/offseason2023/scripts/config/SN39192289.conf:/usr/local/zed/settings/SN39192289.conf
-      - ${HOME}/offseason2023/src/edna_bringup/launch/zed2i.launch.py:/root/ros2_ws/src/zed-ros2-wrapper/zed_wrapper/launch/zed2i.launch.py
+      - ${HOME}/roboeagles2024/src/edna_bringup/config/zed_config-common-custom-box.yaml:/root/ros2_ws/src/zed-ros2-wrapper/zed_wrapper/config/common.yaml
+      - ${HOME}/roboeagles2024/model.engine:/root/ros2_ws/model.engine
+      - ${HOME}/roboeagles2024/scripts/config/SN39192289.conf:/usr/local/zed/settings/SN39192289.conf
+      - ${HOME}/roboeagles2024/src/edna_bringup/launch/zed2i.launch.py:/root/ros2_ws/src/zed-ros2-wrapper/zed_wrapper/launch/zed2i.launch.py
     depends_on:
       - main_control
     deploy:

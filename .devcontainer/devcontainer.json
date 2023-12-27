@@ -1,5 +1,5 @@
 {
-    "name": "offseason",
+    "name": "roboeagles2024",
     "image": "ghcr.io/roboeagles4828/developer-environment:7",
     "containerEnv": {
         "NVIDIA_VISIBLE_DEVICES": "all",
@@ -43,7 +43,7 @@
         "--runtime=nvidia",
         "--gpus", "all",
         "--network=host",
-        "--name=offseason",
+        "--name=roboeagles2024",
         "--init"
     ],
     "privileged": true,
