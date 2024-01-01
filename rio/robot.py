@@ -288,9 +288,9 @@ class Robot(wpilib.TimedRobot):
     def autonomousInit(self):
         self.drive_train.navx.reset()
         self.drive_train.set_navx_offset(0)
-        # self.auton_selector.run()
+        self.auton_selector.run()
         global object_pos
-        self.cone_move = ConeMoveAuton(self.auton_selector.drive_subsystem, object_pos)
+        # self.cone_move = ConeMoveAuton(self.auton_selector.drive_subsystem, object_pos)
         logging.info("Entering Auton")
         global frc_stage
         frc_stage = "AUTON"
@@ -310,7 +310,9 @@ class Robot(wpilib.TimedRobot):
         #     self.drive_train.swerveDriveAuton(0, 0, 0)
         #     self.drive_train.stop()(
         
-        self.drive_train.swerveDriveAuton(object_pos[0]/5.0, object_pos[1]/5.0, object_pos[2]/5.0)
+        # self.drive_train.swerveDriveAuton(object_pos[0]/5.0, object_pos[1]/5.0, object_pos[2]/5.0)
+        
+        logging.info(f"Robot Pose: {self.auton_selector.drive_subsystem.getPose()}")
         
         fms_attached = wpilib.DriverStation.isFMSAttached()
         if self.use_threading:

@@ -1,5 +1,6 @@
 from commands2 import SubsystemBase
-from wpimath.kinematics import ChassisSpeeds
+from wpimath.kinematics import ChassisSpeeds, SwerveDrive4Odometry, SwerveModuleState
+from wpimath.geometry import Rotation2d, Pose2d
 from hardware_interface.drivetrain import DriveTrain
 
 class DriveSubsystem(SubsystemBase):
@@ -7,11 +8,49 @@ class DriveSubsystem(SubsystemBase):
         super().__init__()
         self.drivetrain = drivetrain
         
+        self.odometer = SwerveDrive4Odometry(
+            self.drivetrain.kinematics, 
+            Rotation2d(0),
+            (
+                self.drivetrain.front_left.getState(),
+                self.drivetrain.front_right.getState(),
+                self.drivetrain.rear_left.getState(),
+                self.drivetrain.rear_right.getState()
+            ),
+            Pose2d(0, 0, Rotation2d(0))
+        )
+        
     def swerve_drive(self, x, y, z, field_oriented):
+        self.odometer.update(
+            self.drivetrain.navx.getRotation2d(),
+            self.drivetrain.front_left.getState(),
+            self.drivetrain.front_right.getState(),
+            self.drivetrain.rear_left.getState(),
+            self.drivetrain.rear_right.getState()
+        )
         if field_oriented:
             self.drivetrain.swerveDriveAutonFieldOriented(x, y, z)
         else:
             self.drivetrain.swerveDriveAuton(x, y, z)
+            
+    def setModuleStates(self, states: list[SwerveModuleState]):
+        self.drivetrain.front_left.set(states[0])
+        self.drivetrain.front_right.set(states[1])
+        self.drivetrain.rear_left.set(states[2])
+        self.drivetrain.rear_right.set(states[3])
+            
+    def getPose(self):
+        return self.odometer.getPose()
+    
+    def resetOdometry(self, pose):
+        self.odometer.resetPosition(
+            pose,
+            self.drivetrain.navx.getRotation2d(),
+            self.drivetrain.front_left.getState(),
+            self.drivetrain.front_right.getState(),
+            self.drivetrain.rear_left.getState(),
+            self.drivetrain.rear_right.getState()
+        )
             
     def getWheelEncoderPositions(self):
         return [

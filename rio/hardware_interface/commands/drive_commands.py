@@ -2,7 +2,9 @@ from commands2 import *
 from wpilib import Timer
 import wpimath
 from wpimath.units import *
-from wpimath.controller import PIDController
+from wpimath.controller import PIDController, ProfiledPIDControllerRadians
+from wpimath.geometry import Translation2d, Pose2d, Rotation2d
+from wpimath.trajectory import TrapezoidProfileRadians, TrajectoryConfig, Trajectory, TrajectoryGenerator
 from hardware_interface.subsystems.drive_subsystem import DriveSubsystem
 import logging
 import math
@@ -112,32 +114,58 @@ class BalanceOnChargeStationCommand(CommandBase):
         curr_angle = self.drive.getGyroRoll180()
         return abs(curr_angle) < self.level_threshold
     
-# class BalanceOnChargePIDCommand(CommandBase):
-#     def __init__(self, drive: DriveSubsystem, level_threshold: float):
-#         super().__init__()
-#         self.drive = drive
-#         self.level_threshold = level_threshold
-#         self.pid = PIDController(0.3, 0, 0.1)
-#         # self.pid.enableContinuousInput(-180, 180)
-#         self.pid.setTolerance(level_threshold)
+class SwerveTrajectoryCommand(SequentialCommandGroup):
+    def __init__(self, drive: DriveSubsystem, waypoints: list[Translation2d], end: Pose2d):
+        super().__init__()
+        self.drive = drive
+        self.waypoints = waypoints
+        self.endpoint = end
         
-#     def initialize(self):
-#         self.pid.reset()
-#         self.pid.setSetpoint(0)
+        self.trajectory_config = TrajectoryConfig(
+            self.drive.drivetrain.ROBOT_MAX_TRANSLATIONAL,
+            2.5
+        )
+        self.trajectory_config.setKinematics(self.drive.getKinematics())
         
-#     def execute(self):
-#         current_pitch = self.drive.getGyroRoll180()
-#         pitch_power = self.pid.calculate(current_pitch)
-#         print(-pitch_power)
-#         self.drive.swerve_drive(-pitch_power/1000.0, 0, 0, False)
+        self.trajectory: Trajectory = TrajectoryGenerator.generateTrajectory(
+            self.waypoints,
+            self.trajectory_config
+        )
         
-#     def end(self, interrupted):
-#         self.drive.swerve_drive(0, 0, 0, False)
-#         self.drive.lockDrive()
-#         self.drive.stop()
-    
-#     def isFinished(self):
-#         return self.pid.atSetpoint()
+        self.xController = PIDController(0.5, 0, 0)
+        self.yController = PIDController(0.5, 0, 0)
+        self.thetaController = ProfiledPIDControllerRadians(
+            0.5, 0.0, 0.0, 
+            constraints=TrapezoidProfileRadians.Constraints(1.0, 1.0)
+        )
+        self.thetaController.enableContinuousInput(-math.pi, math.pi)
+        self.addRequirements(self.drive)
+        
+        self.addCommands(
+            InstantCommand(
+                lambda: self.drive.resetOdometry(self.trajectory.sample(0).pose),
+                self.drive
+            ),
+            self.resetCommand,
+            Swerve4ControllerCommand(
+                self.trajectory,
+                self.drive.getPose,
+                self.drive.getKinematics(),
+                self.xController,
+                self.yController,
+                self.thetaController,
+                self.drive.setModuleStates,
+                self.drive
+            ),
+            InstantCommand(
+                lambda: self.drive.swerve_drive(0, 0, 0, False),
+                self.drive
+            )
+        )
+        
+        
+
+        
         
 class DriveToChargeStationCommand(CommandBase):
     def __init__(self, drive: DriveSubsystem, tilt_threshold: float):

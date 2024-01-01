@@ -1,6 +1,6 @@
 import wpilib
 from wpimath.geometry._geometry import *
-from wpimath.kinematics import SwerveDrive4Kinematics, ChassisSpeeds, SwerveModuleState
+from wpimath.kinematics import SwerveDrive4Kinematics, ChassisSpeeds, SwerveModuleState, SwerveModulePosition
 from wpimath.controller import ProfiledPIDControllerRadians
 from wpimath._controls._controls.trajectory import TrapezoidProfileRadians
 from hardware_interface.motion_magic import MotionMagic
@@ -16,6 +16,8 @@ import navx
 from hardware_interface.toggle import ToggleButton
 from hardware_interface.navxSim import NavxSim
 
+from collections import namedtuple
+
 
 NAMESPACE = 'real'
 
@@ -25,6 +27,9 @@ ENABLE_2ND_ORDER = False
 # All wheel drive motors should not be inverted
 # All axle turn motors should be inverted + sensor phase
 # All Cancoders should be direction false
+
+ModuleInfo = namedtuple('ModuleInfo', ['wheelDiameter', 'driveReduction', 'steerReduction'])
+
 MODULE_CONFIG = {
     "front_left": {
         "wheel_joint_name": "front_left_wheel_joint",
@@ -190,6 +195,15 @@ class SwerveModule():
         self.reset_iterations = 0
         
         self.neutralize_count = 0
+        
+        self.module_info = ModuleInfo(
+            wheelDiameter=0.10033,
+            driveReduction=(14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0),
+            steerReduction=(14.0 / 50.0) * (10.0 / 60.0)
+        )
+        
+        self.TURN_CONVERSION = 2.0 * math.pi * self.module_info.steerReduction
+        self.DRIVE_CONVERSION = self.module_info.driveReduction * self.module_info.wheelDiameter * math.pi / TICKS_PER_REV
         
         self.axle_motor.configFactoryDefault()
         self.wheel_motor.configFactoryDefault()
@@ -421,6 +435,12 @@ class SwerveModule():
                 return int(-SCALING_FACTOR_FIX)
             else:
                 return int(SCALING_FACTOR_FIX)
+            
+    def getState(self) -> SwerveModulePosition:
+        return SwerveModulePosition(
+            self.wheel_motor.getSelectedSensorPosition() * self.DRIVE_CONVERSION,
+            Rotation2d(self.getEncoderPosition())
+        )
     
 ############################################################################################################################################################
 # DriveTrain Class
