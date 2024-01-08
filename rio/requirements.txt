@@ -1,0 +1,5 @@
+rticonnextdds-connector
+robotpy==2023.4.2.1
+robotpy[ctre]
+robotpy[commands2]
+wpilib==2023.4.2.0
