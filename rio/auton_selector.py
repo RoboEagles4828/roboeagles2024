@@ -7,6 +7,8 @@ from hardware_interface.commands.drive_commands import *
 from hardware_interface.commands.arm_commands import *
 import time
 
+from pathplannerlib.auto import AutoBuilder, PathPlannerAuto
+
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
 from typing import List
@@ -16,29 +18,32 @@ class AutonSelector():
         self.arm_controller = arm_controller
         self.drive_train = drive_train
         self.TAXI = "Taxi Auton"
-        self.HIGH_PLACE = "High Place Auton"
-        self.HIGH_TAXI = "High Taxi Auton"
-        self.CHARGE = "Charge Auton"
-        self.HIGH_CHARGE = "High Charge Auton"
-        self.MID_TAXI = "Mid Taxi Auton"
-        self.CUBE_HIGH_TAXI = "Cube High Taxi Auton"
-        self.CUBE_HIGH_PLACE = "Cube High Place Auton"
-        self.MID_PLACE = "Mid Place Auton"
-        self.MID_CHARGE = "Mid Charge Auton"
-        self.MID_TAXI_B = "Mid Taxi BUMP Auton"
-        self.HIGH_TAXI_B = "High Taxi BUMP Auton"
-        self.CUBE_HIGH_TAXI_B = "Cube High Taxi BUMP Auton"
-        self.TAXI_AUTON_B = "Taxi Auton BUMP"
+        # self.HIGH_PLACE = "High Place Auton"
+        # self.HIGH_TAXI = "High Taxi Auton"
+        # self.CHARGE = "Charge Auton"
+        # self.HIGH_CHARGE = "High Charge Auton"
+        # self.MID_TAXI = "Mid Taxi Auton"
+        # self.CUBE_HIGH_TAXI = "Cube High Taxi Auton"
+        # self.CUBE_HIGH_PLACE = "Cube High Place Auton"
+        # self.MID_PLACE = "Mid Place Auton"
+        # self.MID_CHARGE = "Mid Charge Auton"
+        # self.MID_TAXI_B = "Mid Taxi BUMP Auton"
+        # self.HIGH_TAXI_B = "High Taxi BUMP Auton"
+        # self.CUBE_HIGH_TAXI_B = "Cube High Taxi BUMP Auton"
+        # self.TAXI_AUTON_B = "Taxi Auton BUMP"
         self.TRAJ = "Trajectory Auton"
+        self.PATHPLANNER = "Pathplanner Auton"
+
         self.autonChooser = wpilib.SendableChooser()
-        self.autonChooser.addOption("Taxi CLEAN Auton", self.TAXI)
-        self.autonChooser.addOption("Taxi BUMP Auton", self.TAXI_AUTON_B)
-        self.autonChooser.addOption("High Place Auton", self.HIGH_PLACE)
-        self.autonChooser.setDefaultOption("High Taxi CLEAN Auton", self.HIGH_TAXI)
-        self.autonChooser.addOption("High Taxi BUMP Auton", self.HIGH_TAXI_B)
-        self.autonChooser.addOption("Charge Auton", self.CHARGE)
-        self.autonChooser.addOption("High Charge Auton", self.HIGH_CHARGE)
+        self.autonChooser.setDefaultOption("Taxi CLEAN Auton", self.TAXI)
+        # self.autonChooser.addOption("Taxi BUMP Auton", self.TAXI_AUTON_B)
+        # self.autonChooser.addOption("High Place Auton", self.HIGH_PLACE)
+        # self.autonChooser.setDefaultOption("High Taxi CLEAN Auton", self.HIGH_TAXI)
+        # self.autonChooser.addOption("High Taxi BUMP Auton", self.HIGH_TAXI_B)
+        # self.autonChooser.addOption("Charge Auton", self.CHARGE)
+        # self.autonChooser.addOption("High Charge Auton", self.HIGH_CHARGE)
         self.autonChooser.addOption("Trajectory Auton", self.TRAJ)
+        self.autonChooser.addOption("Pathplanner Auton", self.PATHPLANNER)
 
         self.selected = self.autonChooser.getSelected()
 
@@ -56,13 +61,14 @@ class AutonSelector():
         
         autons = {
             self.TAXI: self.taxi_auton("clean"),
-            self.TAXI_AUTON_B: self.taxi_auton("bump"),
-            self.HIGH_PLACE: self.high_place_auton(),
-            self.HIGH_TAXI: self.high_taxi_auton("clean"),
-            self.HIGH_TAXI_B: self.high_taxi_auton("bump"),
-            self.CHARGE: self.charge_auton(),
-            self.HIGH_CHARGE: self.high_charge_auton(),
+            # self.TAXI_AUTON_B: self.taxi_auton("bump"),
+            # self.HIGH_PLACE: self.high_place_auton(),
+            # self.HIGH_TAXI: self.high_taxi_auton("clean"),
+            # self.HIGH_TAXI_B: self.high_taxi_auton("bump"),
+            # self.CHARGE: self.charge_auton(),
+            # self.HIGH_CHARGE: self.high_charge_auton(),
             self.TRAJ: self.trajectory_auton(),
+            self.PATHPLANNER: self.pathplannerAuton("1+1")
         }
         
         self.command = autons[self.selected]
@@ -82,6 +88,9 @@ class AutonSelector():
         )
         
         return trajectory_command
+    
+    def pathplannerAuton(self, auto):
+        return PathPlannerAuto(auto)
 
     def high_place_auton(self):
         high_place_auton = ScoreCommand(self.arm_subsystem, ElevatorState.HIGH, "cone")

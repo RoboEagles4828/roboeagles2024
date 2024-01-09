@@ -436,9 +436,15 @@ class SwerveModule():
             else:
                 return int(SCALING_FACTOR_FIX)
             
-    def getState(self) -> SwerveModulePosition:
+    def getPosition(self) -> SwerveModulePosition:
         return SwerveModulePosition(
             self.wheel_motor.getSelectedSensorPosition() * self.DRIVE_CONVERSION,
+            Rotation2d(self.getEncoderPosition())
+        )
+    
+    def getState(self) -> SwerveModuleState:
+        return SwerveModuleState(
+            self.wheel_motor.getSelectedSensorVelocity() * self.DRIVE_CONVERSION,
             Rotation2d(self.getEncoderPosition())
         )
     
