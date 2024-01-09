@@ -1,9 +1,9 @@
-from commands2 import SubsystemBase
+from commands2 import Subsystem
 from wpimath.kinematics import ChassisSpeeds, SwerveDrive4Odometry, SwerveModuleState
 from wpimath.geometry import Rotation2d, Pose2d
 from hardware_interface.drivetrain import DriveTrain
 
-class DriveSubsystem(SubsystemBase):
+class DriveSubsystem(Subsystem):
     def __init__(self, drivetrain: DriveTrain):
         super().__init__()
         self.drivetrain = drivetrain
@@ -34,6 +34,13 @@ class DriveSubsystem(SubsystemBase):
             self.drivetrain.swerveDriveAuton(x, y, z)
             
     def setModuleStates(self, states: list[SwerveModuleState]):
+        self.odometer.update(
+            self.drivetrain.navx.getRotation2d(),
+            self.drivetrain.front_left.getState(),
+            self.drivetrain.front_right.getState(),
+            self.drivetrain.rear_left.getState(),
+            self.drivetrain.rear_right.getState()
+        )
         self.drivetrain.front_left.set(states[0])
         self.drivetrain.front_right.set(states[1])
         self.drivetrain.rear_left.set(states[2])
@@ -44,14 +51,23 @@ class DriveSubsystem(SubsystemBase):
     
     def resetOdometry(self, pose):
         self.odometer.resetPosition(
-            pose,
             self.drivetrain.navx.getRotation2d(),
+            pose,
             self.drivetrain.front_left.getState(),
             self.drivetrain.front_right.getState(),
             self.drivetrain.rear_left.getState(),
             self.drivetrain.rear_right.getState()
         )
             
+    def updateOdometry(self):
+        self.odometer.update(
+            self.drivetrain.navx.getRotation2d(),
+            self.drivetrain.front_left.getState(),
+            self.drivetrain.front_right.getState(),
+            self.drivetrain.rear_left.getState(),
+            self.drivetrain.rear_right.getState()
+        )
+
     def getWheelEncoderPositions(self):
         return [
             self.drivetrain.front_left.getEncoderData()[0]["position"],

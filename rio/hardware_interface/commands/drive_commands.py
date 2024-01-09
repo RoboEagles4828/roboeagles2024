@@ -8,6 +8,7 @@ from wpimath.trajectory import TrapezoidProfileRadians, TrajectoryConfig, Trajec
 from hardware_interface.subsystems.drive_subsystem import DriveSubsystem
 import logging
 import math
+import typing
 
 class Units:
     METERS = 0
@@ -115,15 +116,14 @@ class BalanceOnChargeStationCommand(CommandBase):
         return abs(curr_angle) < self.level_threshold
     
 class SwerveTrajectoryCommand(SequentialCommandGroup):
-    def __init__(self, drive: DriveSubsystem, waypoints: list[Translation2d], end: Pose2d):
+    def __init__(self, drive: DriveSubsystem, waypoints: list[Pose2d]):
         super().__init__()
         self.drive = drive
         self.waypoints = waypoints
-        self.endpoint = end
         
         self.trajectory_config = TrajectoryConfig(
             self.drive.drivetrain.ROBOT_MAX_TRANSLATIONAL,
-            2.5
+            self.drive.drivetrain.ROBOT_MAX_TRANSLATIONAL
         )
         self.trajectory_config.setKinematics(self.drive.getKinematics())
         
@@ -140,13 +140,12 @@ class SwerveTrajectoryCommand(SequentialCommandGroup):
         )
         self.thetaController.enableContinuousInput(-math.pi, math.pi)
         self.addRequirements(self.drive)
-        
+        print(f"Callable {type(self.drive.getPose)}")
         self.addCommands(
             InstantCommand(
                 lambda: self.drive.resetOdometry(self.trajectory.sample(0).pose),
                 self.drive
             ),
-            self.resetCommand,
             Swerve4ControllerCommand(
                 self.trajectory,
                 self.drive.getPose,
@@ -155,7 +154,7 @@ class SwerveTrajectoryCommand(SequentialCommandGroup):
                 self.yController,
                 self.thetaController,
                 self.drive.setModuleStates,
-                self.drive
+                [self.drive]
             ),
             InstantCommand(
                 lambda: self.drive.swerve_drive(0, 0, 0, False),

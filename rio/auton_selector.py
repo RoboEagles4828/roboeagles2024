@@ -71,16 +71,14 @@ class AutonSelector():
         auton.schedule()
         
     def trajectory_auton(self):
-        waypoints = list()
-        waypoints.append(Translation2d(1, 0))
-        waypoints.append(Translation2d(1, -1))
-        
-        end = Pose2d(2, -1, Rotation2d(180))
+        waypoints = [
+            Pose2d(1.24, 2.39, Rotation2d.fromDegrees(0.0)),
+            Pose2d(2.84, 2.39, Rotation2d.fromDegrees(90.0))
+        ]
         
         trajectory_command = SwerveTrajectoryCommand(
             self.drive_subsystem,
-            waypoints,
-            end
+            waypoints
         )
         
         return trajectory_command
@@ -88,17 +86,6 @@ class AutonSelector():
     def high_place_auton(self):
         high_place_auton = ScoreCommand(self.arm_subsystem, ElevatorState.HIGH, "cone")
         return high_place_auton
-        
-    # def mid_place_auton(self):
-    #     mid_place_auton = ScoreCommand(self.arm_subsystem, ElevatorState.MID, "cone")
-    #     return mid_place_auton
-
-    # def mid_taxi_auton(self, side):
-    #     mid_taxi_auton = SequentialCommandGroup(
-    #         ScoreCommand(self.arm_subsystem, ElevatorState.MID, "cone"),
-    #         TaxiAutoCommand(self.drive_subsystem, side)
-    #     )
-    #     return mid_taxi_auton
 
     def high_taxi_auton(self, side):
         high_taxi_auton = SequentialCommandGroup(

@@ -280,6 +280,7 @@ class Robot(wpilib.TimedRobot):
 
     def robotPeriodic(self):
         self.joystick.type = self.joystick_selector.getSelected()
+        self.auton_selector.drive_subsystem.updateOdometry()
         if navx_sim_data is not None:
             self.drive_train.navx_sim.update(*navx_sim_data)
 
