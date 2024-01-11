@@ -116,21 +116,24 @@ class BalanceOnChargeStationCommand(CommandBase):
         return abs(curr_angle) < self.level_threshold
     
 class SwerveTrajectoryCommand(SequentialCommandGroup):
-    def __init__(self, drive: DriveSubsystem, waypoints: list[Pose2d]):
+    def __init__(self, drive: DriveSubsystem, waypoints: list[Pose2d], trajectory=None):
         super().__init__()
         self.drive = drive
         self.waypoints = waypoints
-        
-        self.trajectory_config = TrajectoryConfig(
-            self.drive.drivetrain.ROBOT_MAX_TRANSLATIONAL,
-            self.drive.drivetrain.ROBOT_MAX_TRANSLATIONAL
-        )
-        self.trajectory_config.setKinematics(self.drive.getKinematics())
-        
-        self.trajectory: Trajectory = TrajectoryGenerator.generateTrajectory(
-            self.waypoints,
-            self.trajectory_config
-        )
+
+        if len(self.waypoints) > 0:
+            self.trajectory_config = TrajectoryConfig(
+                1.0,
+                0.5
+            )
+            self.trajectory_config.setKinematics(self.drive.getKinematics())
+            
+            self.trajectory: Trajectory = TrajectoryGenerator.generateTrajectory(
+                self.waypoints,
+                self.trajectory_config
+            )
+        else:
+            self.trajectory = trajectory
         
         self.xController = PIDController(0.5, 0, 0)
         self.yController = PIDController(0.5, 0, 0)

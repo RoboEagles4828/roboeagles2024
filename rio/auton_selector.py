@@ -7,8 +7,7 @@ from hardware_interface.commands.drive_commands import *
 from hardware_interface.commands.arm_commands import *
 import time
 
-from pathplannerlib.auto import AutoBuilder, PathPlannerAuto
-
+from pathplannerlib import PathConstraints, PathPlannerTrajectory, PathPlanner
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
 from typing import List
@@ -78,8 +77,8 @@ class AutonSelector():
         
     def trajectory_auton(self):
         waypoints = [
-            Pose2d(1.24, 2.39, Rotation2d.fromDegrees(0.0)),
-            Pose2d(2.84, 2.39, Rotation2d.fromDegrees(90.0))
+            Pose2d(0, 0, Rotation2d.fromDegrees(0.0)),
+            Pose2d(1.0, 0.0, Rotation2d.fromDegrees(90.0))
         ]
         
         trajectory_command = SwerveTrajectoryCommand(
@@ -90,7 +89,17 @@ class AutonSelector():
         return trajectory_command
     
     def pathplannerAuton(self, auto):
-        return PathPlannerAuto(auto)
+        pathGroup = PathPlanner.loadPathGroup(auto, [PathConstraints(1, 0.5)])
+
+        traj_cmd = SequentialCommandGroup()
+
+        for i in pathGroup:
+            traj_cmd.addCommands(
+                SwerveTrajectoryCommand(self.drive_subsystem, [], trajectory=i.asWPILibTrajectory())
+            )
+
+        return traj_cmd
+        
 
     def high_place_auton(self):
         high_place_auton = ScoreCommand(self.arm_subsystem, ElevatorState.HIGH, "cone")

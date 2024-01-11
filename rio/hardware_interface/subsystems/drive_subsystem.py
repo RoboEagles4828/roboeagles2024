@@ -3,8 +3,8 @@ from wpimath.kinematics import ChassisSpeeds, SwerveDrive4Odometry, SwerveModule
 from wpimath.geometry import Rotation2d, Pose2d, Translation2d
 from hardware_interface.drivetrain import DriveTrain
 
-from pathplannerlib.auto import AutoBuilder
-from pathplannerlib.config import HolonomicPathFollowerConfig, ReplanningConfig, PIDConstants
+# from pathplannerlib import *
+# from pathplannerlib.config import HolonomicPathFollowerConfig, ReplanningConfig, PIDConstants
 from wpilib import DriverStation
 
 class DriveSubsystem(Subsystem):
@@ -25,22 +25,6 @@ class DriveSubsystem(Subsystem):
         )
 
         self.robot_center = Translation2d(0, 0)
-
-        AutoBuilder.configureHolonomic(
-            self.getPose,
-            self.resetOdometry,
-            self.getRobotRelativeChassisSpeeds,
-            self.driveRobotRelativePathPlanner,
-            HolonomicPathFollowerConfig(
-                PIDConstants(1.0, 0.0, 0.0),
-                PIDConstants(1.0, 0.0, 0.0),
-                self.drivetrain.MODULE_MAX_SPEED,
-                self.robot_center.distance(self.drivetrain.front_left_location),
-                ReplanningConfig()
-            ),
-            self.pathFlip,
-            self
-        )
 
     def pathFlip(self):
         return DriverStation.getAlliance() == DriverStation.Alliance.kRed
