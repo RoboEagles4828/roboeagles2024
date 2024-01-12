@@ -7,7 +7,7 @@ from hardware_interface.commands.drive_commands import *
 from hardware_interface.commands.arm_commands import *
 import time
 
-from pathplannerlib import PathConstraints, PathPlannerTrajectory, PathPlanner
+from pathplannerlib.auto import AutoBuilder, PathPlannerAuto
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
 from typing import List
@@ -89,16 +89,7 @@ class AutonSelector():
         return trajectory_command
     
     def pathplannerAuton(self, auto):
-        pathGroup = PathPlanner.loadPathGroup(auto, [PathConstraints(1, 0.5)])
-
-        traj_cmd = SequentialCommandGroup()
-
-        for i in pathGroup:
-            traj_cmd.addCommands(
-                SwerveTrajectoryCommand(self.drive_subsystem, [], trajectory=i.asWPILibTrajectory())
-            )
-
-        return traj_cmd
+        return PathPlannerAuto(auto)
         
 
     def high_place_auton(self):

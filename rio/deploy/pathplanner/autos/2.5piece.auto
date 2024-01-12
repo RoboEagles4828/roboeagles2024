@@ -1,0 +1,37 @@
+{
+  "version": 1.0,
+  "startingPose": null,
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Preload"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ScoreIntakedPiece"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "GrabPiece"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

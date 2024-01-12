@@ -3,8 +3,8 @@ from wpimath.kinematics import ChassisSpeeds, SwerveDrive4Odometry, SwerveModule
 from wpimath.geometry import Rotation2d, Pose2d, Translation2d
 from hardware_interface.drivetrain import DriveTrain
 
-# from pathplannerlib import *
-# from pathplannerlib.config import HolonomicPathFollowerConfig, ReplanningConfig, PIDConstants
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.config import HolonomicPathFollowerConfig, ReplanningConfig, PIDConstants
 from wpilib import DriverStation
 
 class DriveSubsystem(Subsystem):
@@ -22,6 +22,22 @@ class DriveSubsystem(Subsystem):
                 self.drivetrain.rear_right.getPosition()
             ),
             Pose2d(0, 0, Rotation2d(0))
+        )
+
+        AutoBuilder.configureHolonomic(
+            self.getPose, # Robot pose supplier
+            self.resetOdometry,
+            self.getRobotRelativeChassisSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            self.driveRobotRelativePathPlanner, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+            HolonomicPathFollowerConfig( # HolonomicPathFollowerConfig, this should likely live in your Constants class
+                PIDConstants(0.5, 0.0, 0.0), # Translation PID constants
+                PIDConstants(0.5, 0.0, 0.0), # Rotation PID constants
+                1.0, # Max module speed, in m/s
+                0.5, # Drive base radius in meters. Distance from robot center to furthest module.
+                ReplanningConfig() # Default path replanning config. See the API for the options here
+            ),
+            self.pathFlip, # Supplier to control path flipping based on alliance color
+            self # Reference to this subsystem to set requirements
         )
 
         self.robot_center = Translation2d(0, 0)

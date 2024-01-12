@@ -1,0 +1,49 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.382208297859711,
+        "y": 4.117966971550884
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.751170345053997,
+        "y": 5.15860809471806
+      },
+      "isLocked": false,
+      "linkedName": "Intake Endpoint"
+    },
+    {
+      "anchor": {
+        "x": 1.601330895312963,
+        "y": 5.52487143328584
+      },
+      "prevControl": {
+        "x": 2.362428664943092,
+        "y": 4.189980458300307
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Preload endpoint"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0,
+    "rotateFast": true
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": null,
+  "useDefaultConstraints": false
+}
