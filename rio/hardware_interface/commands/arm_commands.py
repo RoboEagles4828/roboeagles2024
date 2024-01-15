@@ -1,4 +1,4 @@
-from commands2 import *
+from commands2 import CommandBase, SequentialCommandGroup
 from wpilib import Timer
 import wpimath
 from wpimath.controller import PIDController

@@ -1,6 +1,7 @@
-from commands2 import *
+from commands2 import CommandBase, SequentialCommandGroup, InstantCommand, PrintCommand, Swerve4ControllerCommand
 from wpilib import Timer
 import wpimath
+from wpimath import angleModulus
 from wpimath.units import *
 from wpimath.controller import PIDController, ProfiledPIDControllerRadians
 from wpimath.geometry import Translation2d, Pose2d, Rotation2d
@@ -44,46 +45,32 @@ class DriveTimeAutoCommand(CommandBase):
         return self.timer.get() >= self.seconds
         
 class TurnToAngleCommand(CommandBase):
-    def __init__(self, drive: DriveSubsystem, angle: float, relative: bool):
+    def __init__(self, drive: DriveSubsystem, angle: float):
         super().__init__()
         self.drive = drive
         self.angle = angle
-        self.target = 0
-        self.relative = relative
-        self.threshold = 5
+        self.pid_constraints = TrapezoidProfileRadians.Constraints(2*math.pi, 2*math.pi)
+        self.turnPID = ProfiledPIDControllerRadians(1, 0, 0, self.pid_constraints)
+        self.turnPID.setTolerance(math.radians(1))
         self.addRequirements(self.drive)
-        
+
     def initialize(self):
-        logging.info("TurnToAngleCommand initialized")
-        current_angle = self.drive.getGyroAngle180()
-        if self.relative:
-            self.target = current_angle + self.angle
-        else:
-            self.target = self.angle
-            
-    def clampToRange(self, value, min, max):
-        if value > max:
-            return max
-        elif value < min:
-            return min
-        else:
-            return value
-        
+        self.start_angle = self.drive.drivetrain.navx.getRotation2d().radians()
+        self.turnPID.reset(self.drive.drivetrain.navx.getRotation2d().radians())
+        self.turnPID.setGoal(math.radians(self.angle))
+
     def execute(self):
-        current_angle = self.drive.getGyroAngle180()
-        turn_power = math.copysign(2.5, self.target - current_angle)
-        other_velocities = (self.drive.getVelocity().vx, self.drive.getVelocity().vy)
-        logging.info(f"TurnToAngleCommand executing, target: {self.target} current: {self.drive.getGyroAngle180()} power: {turn_power/1000.0}")
-        self.drive.swerve_drive(other_velocities[0], other_velocities[1], turn_power, True)
-        
+        self.angularVelMRadiansPerSecond = self.turnPID.calculate(self.drive.drivetrain.navx.getRotation2d().radians())
+        self.drive.swerve_drive(0, 0, self.angularVelMRadiansPerSecond, False)
+
     def end(self, interrupted):
-        logging.info("TurnToAngleCommand ended")
-        other_velocities = (self.drive.getVelocity().vx, self.drive.getVelocity().vy)
-        self.drive.swerve_drive(other_velocities[0], other_velocities[1], 0, True)
+        self.drive.swerve_drive(0, 0, 0, False)
         self.drive.stop()
-        
+
     def isFinished(self):
-        return abs(self.drive.getGyroAngle180() - self.target) < self.threshold
+        return self.turnPID.atSetpoint()
+
+
         
 class BalanceOnChargeStationCommand(CommandBase):
     def __init__(self, drive: DriveSubsystem, level_threshold: float):
@@ -138,7 +125,7 @@ class SwerveTrajectoryCommand(SequentialCommandGroup):
         self.xController = PIDController(0.5, 0, 0)
         self.yController = PIDController(0.5, 0, 0)
         self.thetaController = ProfiledPIDControllerRadians(
-            0.5, 0.0, 0.0, 
+            4, 0.0, 0.0, 
             constraints=TrapezoidProfileRadians.Constraints(1.0, 1.0)
         )
         self.thetaController.enableContinuousInput(-math.pi, math.pi)

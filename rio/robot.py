@@ -263,6 +263,7 @@ class Robot(wpilib.TimedRobot):
         self.shuffleboard.addBoolean("SLOW", lambda: (self.drive_train.slow))
         self.shuffleboard.addDoubleArray("MOTOR TEMPS", lambda: (self.drive_train.motor_temps))
         self.shuffleboard.addDoubleArray("JOYSTICK OUTPUT", lambda: ([self.drive_train.linX, self.drive_train.linY, self.drive_train.angZ]))
+        self.shuffleboard.addDoubleArray("POSE: ", lambda: ([self.auton_selector.drive_subsystem.getPose().X(), self.auton_selector.drive_subsystem.getPose().Y(), self.auton_selector.drive_subsystem.getPose().rotation().degrees()]))
         self.shuffleboard.addString("AUTO TURN STATE", lambda: (self.drive_train.auto_turn_value))
         
         self.second_order_chooser = wpilib.SendableChooser()
@@ -272,9 +273,6 @@ class Robot(wpilib.TimedRobot):
         self.shuffleboard.add("2nd Order", self.second_order_chooser)
 
         self.arm_controller.setToggleButtons()
-        
-        self.load_cmd = TurnToAngleCommand(self.auton_selector.drive_subsystem, 0, False)
-        self.score_cmd = TurnToAngleCommand(self.auton_selector.drive_subsystem, 180, False)
         
         self.auton_run = False
 
@@ -297,7 +295,6 @@ class Robot(wpilib.TimedRobot):
         frc_stage = "AUTON"
 
     def autonomousPeriodic(self):
-        self.drive_train.set_navx_offset(180)
         CommandScheduler.getInstance().run()
         global object_pos       
         global fms_attached
@@ -331,28 +328,14 @@ class Robot(wpilib.TimedRobot):
     # Teleop
     def teleopInit(self):
         self.arm_controller.setToggleButtons()
-        self.drive_train.reset_slew()
-        self.drive_train.unlockDrive()
         CommandScheduler.getInstance().cancelAll()
         logging.info("Entering Teleop")
         global frc_stage
         frc_stage = "TELEOP"
 
     def teleopPeriodic(self):
-        dt.ENABLE_2ND_ORDER = self.second_order_chooser.getSelected()
-        if not self.load_cmd.isScheduled() and not self.score_cmd.isScheduled():
-            self.drive_train.swerveDrive(self.joystick)
+        self.drive_train.swerveDrive(self.joystick)
         self.arm_controller.setArm(self.joystick)
-        if self.drive_train.field_oriented_value and self.drive_train.auto_turn_value == "load":
-            self.load_cmd.setOtherVelocities((self.drive_train.linX, self.drive_train.linY))
-            self.load_cmd.schedule()
-            CommandScheduler.getInstance().run()
-        elif self.drive_train.field_oriented_value and self.drive_train.auto_turn_value == "score":
-            self.score_cmd.setOtherVelocities((self.drive_train.linX, self.drive_train.linY))
-            self.score_cmd.schedule()
-            CommandScheduler.getInstance().run()
-        else:
-            CommandScheduler.getInstance().cancelAll()
         global fms_attached
         fms_attached = wpilib.DriverStation.isFMSAttached()
         if self.use_threading:

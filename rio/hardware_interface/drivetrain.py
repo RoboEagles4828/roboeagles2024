@@ -786,12 +786,39 @@ class DriveTrain():
         
         return data
 
+    def swerveDrivePath(self, x, y, z, max_mod, maxt, maxr):
+        self.speeds = ChassisSpeeds(x, -y, z)
+        self.module_state = self.kinematics.toSwerveModuleStates(self.speeds)
+        self.kinematics.desaturateWheelSpeeds(self.module_state, self.speeds, max_mod, maxt, maxr)
+
+        self.front_left_state: SwerveModuleState = self.module_state[0]
+        self.front_right_state: SwerveModuleState = self.module_state[1]
+        self.rear_left_state: SwerveModuleState = self.module_state[2]
+        self.rear_right_state: SwerveModuleState = self.module_state[3]
+
+        # optimize states
+        self.front_left_state = SwerveModuleState.optimize(self.front_left_state, Rotation2d(self.front_left.getEncoderPosition()))
+        self.front_right_state = SwerveModuleState.optimize(self.front_right_state, Rotation2d(self.front_right.getEncoderPosition()))
+        self.rear_left_state = SwerveModuleState.optimize(self.rear_left_state, Rotation2d(self.rear_left.getEncoderPosition()))
+        self.rear_right_state = SwerveModuleState.optimize(self.rear_right_state, Rotation2d(self.rear_right.getEncoderPosition()))
+        
+        # using custom optimize
+        # self.front_left_state = self.customOptimize(self.front_left_state, Rotation2d(self.front_left.getEncoderPosition()))
+        # self.front_right_state = self.customOptimize(self.front_right_state, Rotation2d(self.front_right.getEncoderPosition()))
+        # self.rear_left_state = self.customOptimize(self.rear_left_state, Rotation2d(self.rear_left.getEncoderPosition()))
+        # self.rear_right_state = self.customOptimize(self.rear_right_state, Rotation2d(self.rear_right.getEncoderPosition()))
+
+        self.front_left.set(self.front_left_state)
+        self.front_right.set(self.front_right_state)
+        self.rear_left.set(self.rear_left_state)
+        self.rear_right.set(self.rear_right_state)
+
     def swerveDriveAuton(self, linearX, linearY, angularZ):
         ROBOT_MAX_TRANSLATIONAL = 5.0
         ROBOT_MAX_ROTATIONAL = 5.0
         MODULE_MAX_SPEED = 5.0
         if ENABLE_2ND_ORDER:
-            self.speeds = self.correctForDynamics(ChassisSpeeds(linearX*ROBOT_MAX_TRANSLATIONAL, -linearY*ROBOT_MAX_TRANSLATIONAL, angularZ*ROBOT_MAX_ROTATIONAL))
+            self.speeds = self.correctForDynamics(ChassisSpeeds(linearX*ROBOT_MAX_TRANSLATIONAL, -linearY*ROBOT_MAX_TRANSLATIONAL, angularZ*ROBOT_MAX_ROTATIONAL))  
         else:
             self.speeds = ChassisSpeeds(linearX*ROBOT_MAX_TRANSLATIONAL, -linearY*ROBOT_MAX_TRANSLATIONAL, angularZ*ROBOT_MAX_ROTATIONAL)
         self.linX = linearX*ROBOT_MAX_TRANSLATIONAL

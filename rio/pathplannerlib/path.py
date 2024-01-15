@@ -366,7 +366,7 @@ class PathPlannerPath:
         self._previewStartingRotation = preview_starting_rotation
 
         PathPlannerPath._instances += 1
-        report(tResourceType.kResourceType_PathPlannerPath.value, PathPlannerPath._instances)
+        # report(tResourceType.kResourceType_PathPlannerPath.value, PathPlannerPath._instances)
 
     @staticmethod
     def fromPathPoints(path_points: List[PathPoint], constraints: PathConstraints,

@@ -10,6 +10,8 @@ import time
 from pathplannerlib.auto import AutoBuilder, PathPlannerAuto
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
+from commands2 import Command
+
 from typing import List
 
 class AutonSelector():
@@ -34,7 +36,7 @@ class AutonSelector():
         self.PATHPLANNER = "Pathplanner Auton"
 
         self.autonChooser = wpilib.SendableChooser()
-        self.autonChooser.setDefaultOption("Taxi CLEAN Auton", self.TAXI)
+        self.autonChooser.addOption("Taxi CLEAN Auton", self.TAXI)
         # self.autonChooser.addOption("Taxi BUMP Auton", self.TAXI_AUTON_B)
         # self.autonChooser.addOption("High Place Auton", self.HIGH_PLACE)
         # self.autonChooser.setDefaultOption("High Taxi CLEAN Auton", self.HIGH_TAXI)
@@ -42,7 +44,7 @@ class AutonSelector():
         # self.autonChooser.addOption("Charge Auton", self.CHARGE)
         # self.autonChooser.addOption("High Charge Auton", self.HIGH_CHARGE)
         self.autonChooser.addOption("Trajectory Auton", self.TRAJ)
-        self.autonChooser.addOption("Pathplanner Auton", self.PATHPLANNER)
+        self.autonChooser.setDefaultOption("Pathplanner Auton", self.PATHPLANNER)
 
         self.selected = self.autonChooser.getSelected()
 
@@ -67,7 +69,7 @@ class AutonSelector():
             # self.CHARGE: self.charge_auton(),
             # self.HIGH_CHARGE: self.high_charge_auton(),
             self.TRAJ: self.trajectory_auton(),
-            self.PATHPLANNER: self.pathplannerAuton("1+1")
+            self.PATHPLANNER: self.pathplannerAuton("TestAuto")
         }
         
         self.command = autons[self.selected]
@@ -76,17 +78,20 @@ class AutonSelector():
         auton.schedule()
         
     def trajectory_auton(self):
-        waypoints = [
-            Pose2d(0, 0, Rotation2d.fromDegrees(0.0)),
-            Pose2d(1.0, 0.0, Rotation2d.fromDegrees(90.0))
-        ]
+        # waypoints = [
+        #     Pose2d(0, 0, Rotation2d.fromDegrees(0.0)),
+        #     Pose2d(1.0, 0.0, Rotation2d.fromDegrees(90.0))
+        # ]
         
-        trajectory_command = SwerveTrajectoryCommand(
-            self.drive_subsystem,
-            waypoints
-        )
+        # trajectory_command = SwerveTrajectoryCommand(
+        #     self.drive_subsystem,
+        #     waypoints
+        # )
+
+        trajectory_command = TurnToAngleCommand(self.drive_subsystem, 90.0)
         
         return trajectory_command
+        pass
     
     def pathplannerAuton(self, auto):
         return PathPlannerAuto(auto)

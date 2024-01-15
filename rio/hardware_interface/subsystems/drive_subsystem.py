@@ -30,10 +30,10 @@ class DriveSubsystem(Subsystem):
             self.getRobotRelativeChassisSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             self.driveRobotRelativePathPlanner, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             HolonomicPathFollowerConfig( # HolonomicPathFollowerConfig, this should likely live in your Constants class
-                PIDConstants(0.5, 0.0, 0.0), # Translation PID constants
-                PIDConstants(0.5, 0.0, 0.0), # Rotation PID constants
+                PIDConstants(4.0, 0.0, 0.0), # Translation PID constants
+                PIDConstants(4.0, 0.0, 0.0), # Rotation PID constants
                 1.0, # Max module speed, in m/s
-                0.5, # Drive base radius in meters. Distance from robot center to furthest module.
+                0.3683, # Drive base radius in meters. Distance from robot center to furthest module.
                 ReplanningConfig() # Default path replanning config. See the API for the options here
             ),
             self.pathFlip, # Supplier to control path flipping based on alliance color
@@ -46,50 +46,41 @@ class DriveSubsystem(Subsystem):
         return DriverStation.getAlliance() == DriverStation.Alliance.kRed
 
     def swerve_drive(self, x, y, z, field_oriented):
-        self.odometer.update(
-            self.drivetrain.navx.getRotation2d(),
-            self.drivetrain.front_left.getPosition(),
-            self.drivetrain.front_right.getPosition(),
-            self.drivetrain.rear_left.getPosition(),
-            self.drivetrain.rear_right.getPosition()
-        )
+        self.updateOdometry()
         if field_oriented:
             self.drivetrain.swerveDriveAutonFieldOriented(x, y, z)
         else:
             self.drivetrain.swerveDriveAuton(x, y, z)
 
     def driveRobotRelativePathPlanner(self, speeds: ChassisSpeeds):
-        self.swerve_drive(speeds.vx, speeds.vy, speeds.omega, False)
+        self.drivetrain.swerveDrivePath(speeds.vx, speeds.vy, speeds.omega, 1.0, 1.0, 1.0)
             
     def setModuleStates(self, states: list[SwerveModuleState]):
-        self.odometer.update(
-            self.drivetrain.navx.getRotation2d(),
-            self.drivetrain.front_left.getPosition(),
-            self.drivetrain.front_right.getPosition(),
-            self.drivetrain.rear_left.getPosition(),
-            self.drivetrain.rear_right.getPosition()
-        )
+        self.updateOdometry()
         self.drivetrain.front_left.set(states[0])
         self.drivetrain.front_right.set(states[1])
         self.drivetrain.rear_left.set(states[2])
         self.drivetrain.rear_right.set(states[3])
             
     def getPose(self):
-        return self.odometer.getPose()
+        pos = self.odometer.getPose()
+        return Pose2d(
+            pos.X(),
+            -pos.Y(),
+            pos.rotation()
+        )
     
     def getRobotRelativeChassisSpeeds(self):
-        self.drivetrain.kinematics.toChassisSpeeds(
-            (
-                self.drivetrain.front_left.getState(),
-                self.drivetrain.front_right.getState(),
-                self.drivetrain.rear_left.getState(),
-                self.drivetrain.rear_right.getState()
-            )
+        return self.drivetrain.kinematics.toChassisSpeeds(
+            self.drivetrain.front_left.getState(),
+            self.drivetrain.front_right.getState(),
+            self.drivetrain.rear_left.getState(),
+            self.drivetrain.rear_right.getState()
         )
     
     def resetOdometry(self, pose):
         self.odometer.resetPosition(
-            self.drivetrain.navx.getRotation2d(),
+            -self.drivetrain.navx.getRotation2d(),
             pose,
             self.drivetrain.front_left.getPosition(),
             self.drivetrain.front_right.getPosition(),
@@ -99,7 +90,7 @@ class DriveSubsystem(Subsystem):
             
     def updateOdometry(self):
         self.odometer.update(
-            self.drivetrain.navx.getRotation2d(),
+            -self.drivetrain.navx.getRotation2d(),
             self.drivetrain.front_left.getPosition(),
             self.drivetrain.front_right.getPosition(),
             self.drivetrain.rear_left.getPosition(),

@@ -9,14 +9,14 @@ from .geometry_util import floatLerp, flipFieldPose
 from wpimath.geometry import Pose2d
 from wpimath.kinematics import ChassisSpeeds
 from wpilib import Timer
-from commands2 import Command, Subsystem, SequentialCommandGroup
+from commands2 import Command, Subsystem, SequentialCommandGroup, CommandBase
 from typing import Callable, Tuple, List
 from .config import ReplanningConfig, HolonomicPathFollowerConfig
 from .pathfinding import Pathfinding
 from hal import report, tResourceType
 
 
-class FollowPathCommand(Command):
+class FollowPathCommand(CommandBase):
     _originalPath: PathPlannerPath
     _poseSupplier: Callable[[], Pose2d]
     _speedsSupplier: Callable[[], ChassisSpeeds]
@@ -82,8 +82,9 @@ class FollowPathCommand(Command):
 
         self._controller.reset(currentPose, currentSpeeds)
 
-        fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(currentSpeeds, currentPose.rotation())
-        currentHeading = Rotation2d(fieldSpeeds.vx, fieldSpeeds.vy)
+        fieldSpeeds = ChassisSpeeds(currentSpeeds.vx, currentSpeeds.vy, currentPose.rotation().radians())
+        # currentHeading = Rotation2d(fieldSpeeds.vx, fieldSpeeds.vy)
+        currentHeading = currentPose.rotation()
         targetHeading = (self._path.getPoint(1).position - self._path.getPoint(0).position).angle()
         headingError = currentHeading - targetHeading
         onHeading = math.hypot(currentSpeeds.vx, currentSpeeds.vy) < 0.25 or abs(headingError.degrees()) < 30
@@ -339,7 +340,7 @@ class PathfindingCommand(Command):
             self._goalEndState = GoalEndState(goal_end_vel, target_pose.rotation(), True)
 
         PathfindingCommand._instances += 1
-        report(tResourceType.kResourceType_PathFindingCommand.value, PathfindingCommand._instances)
+        # report(tResourceType.kResourceType_PathFindingCommand.value, PathfindingCommand._instances)
 
     def initialize(self):
         self._currentTrajectory = None
@@ -400,7 +401,7 @@ class PathfindingCommand(Command):
                 closestState1 = self._currentTrajectory.getState(closestState1Idx)
                 closestState2 = self._currentTrajectory.getState(closestState2Idx)
 
-                fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(currentSpeeds, currentPose.rotation())
+                fieldRelativeSpeeds = ChassisSpeeds(currentSpeeds.vx, currentSpeeds.vy, currentPose.rotation().radians())
                 currentHeading = Rotation2d(fieldRelativeSpeeds.vx, fieldRelativeSpeeds.vy)
                 headingError = currentHeading - closestState1.heading
                 onHeading = math.hypot(currentSpeeds.vx, currentSpeeds.vy) < 1.0 or abs(headingError.degrees()) < 45

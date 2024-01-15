@@ -11,7 +11,7 @@ from .geometry_util import flipFieldPose
 import os
 from wpilib import getDeployDirectory
 import json
-from commands2 import Command
+from commands2 import Command, CommandBase
 from commands2 import Subsystem
 from .config import HolonomicPathFollowerConfig, ReplanningConfig
 from hal import report, tResourceType
@@ -475,7 +475,7 @@ class AutoBuilder:
             return AutoBuilder.getAutoCommandFromJson(auto_json)
 
 
-class PathPlannerAuto(Command):
+class PathPlannerAuto(CommandBase):
     _autoCommand: Command
 
     _instances: int = 0
@@ -496,7 +496,7 @@ class PathPlannerAuto(Command):
         self.setName(auto_name)
 
         PathPlannerAuto._instances += 1
-        report(tResourceType.kResourceType_PathPlannerAuto.value, PathPlannerAuto._instances)
+        # report(tResourceType.kResourceType_PathPlannerAuto.value, PathPlannerAuto._instances)
 
     @staticmethod
     def getStartingPoseFromAutoFile(auto_name: str) -> Pose2d:
