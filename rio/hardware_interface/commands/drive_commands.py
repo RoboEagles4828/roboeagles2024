@@ -61,6 +61,7 @@ class TurnToAngleCommand(CommandBase):
 
     def execute(self):
         self.angularVelMRadiansPerSecond = self.turnPID.calculate(self.drive.drivetrain.navx.getRotation2d().radians())
+        logging.info(f"Turn Speed: {self.angularVelMRadiansPerSecond}")
         self.drive.swerve_drive(0, 0, self.angularVelMRadiansPerSecond, False)
 
     def end(self, interrupted):
@@ -68,7 +69,7 @@ class TurnToAngleCommand(CommandBase):
         self.drive.stop()
 
     def isFinished(self):
-        return self.turnPID.atSetpoint()
+        return self.turnPID.atGoal()
 
 
         

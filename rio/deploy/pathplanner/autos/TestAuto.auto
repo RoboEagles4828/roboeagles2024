@@ -16,6 +16,18 @@
           "data": {
             "pathName": "TestingPath"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Turn180"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TestPathReverse"
+          }
         }
       ]
     }

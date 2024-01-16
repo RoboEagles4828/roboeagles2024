@@ -16,6 +16,8 @@ import logging
 import traceback
 import threading
 
+from pathplannerlib.auto import NamedCommands
+
 ENABLE_STAGE_BROADCASTER = True
 ENABLE_ENCODER = True
 
@@ -275,6 +277,14 @@ class Robot(wpilib.TimedRobot):
         self.arm_controller.setToggleButtons()
         
         self.auton_run = False
+        
+        self.turn_90 = TurnToAngleCommand(self.auton_selector.drive_subsystem, 90.0)
+        self.turn_180 = TurnToAngleCommand(self.auton_selector.drive_subsystem, 180.0)
+        self.turn_270 = TurnToAngleCommand(self.auton_selector.drive_subsystem, 270.0)
+        self.turn_0 = TurnToAngleCommand(self.auton_selector.drive_subsystem, 0.0)
+
+        NamedCommands.registerCommand("Turn180", self.turn_180)
+
 
     def robotPeriodic(self):
         self.joystick.type = self.joystick_selector.getSelected()
@@ -310,7 +320,7 @@ class Robot(wpilib.TimedRobot):
         
         # self.drive_train.swerveDriveAuton(object_pos[0]/5.0, object_pos[1]/5.0, object_pos[2]/5.0)
         
-        logging.info(f"Robot Pose: {self.auton_selector.drive_subsystem.getPose()}")
+        # logging.info(f"Robot Pose: {self.auton_selector.drive_subsystem.getPose()}")
         
         fms_attached = wpilib.DriverStation.isFMSAttached()
         if self.use_threading:
