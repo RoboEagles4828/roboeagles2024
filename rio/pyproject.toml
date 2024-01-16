@@ -31,6 +31,6 @@ requires = [
     "robotpy-commands-v2==2024.0.0b4",
     "robotpy-ctre==2024.1.1",
     "squaternion",
-    "robotpy-pathplannerlib==2024.1.1",
+    "robotpy-pathplannerlib==2024.1.3",
     "rticonnextdds-connector"
 ]
