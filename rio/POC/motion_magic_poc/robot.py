@@ -1,6 +1,6 @@
 import logging
 import wpilib
-import ctre
+import phoenix5
 import math
 
 # Ports
@@ -73,29 +73,29 @@ class motor_poc(wpilib.TimedRobot):
         self.joystick = wpilib.XboxController(controllerPort)
 
         # Configure CANCoder
-        canCoderConfig = ctre.CANCoderConfiguration()
-        canCoderConfig.absoluteSensorRange = ctre.AbsoluteSensorRange.Unsigned_0_to_360
-        canCoderConfig.initializationStrategy = ctre.SensorInitializationStrategy.BootToAbsolutePosition
+        canCoderConfig = phoenix5.CANCoderConfiguration()
+        canCoderConfig.absoluteSensorRange = phoenix5.AbsoluteSensorRange.Unsigned_0_to_360
+        canCoderConfig.initializationStrategy = phoenix5.SensorInitializationStrategy.BootToAbsolutePosition
         canCoderConfig.magnetOffsetDegrees = encoder_offset
         canCoderConfig.sensorDirection = encoder_direction
         # Setup encoder to be in radians
         canCoderConfig.sensorCoefficient = 2 * math.pi / encoder_ticks_per_rev
         canCoderConfig.unitString = "rad"
-        canCoderConfig.sensorTimeBase = ctre.SensorTimeBase.PerSecond
-        self.encoder = ctre.CANCoder(encoderPort)
+        canCoderConfig.sensorTimeBase = phoenix5.SensorTimeBase.PerSecond
+        self.encoder = phoenix5.CANCoder(encoderPort)
         self.encoder.configAllSettings(canCoderConfig, timeout_ms)
         self.encoder.setPositionToAbsolute(timeout_ms)
-        self.encoder.setStatusFramePeriod(ctre.CANCoderStatusFrame.SensorData, 10, timeout_ms)
+        self.encoder.setStatusFramePeriod(phoenix5.CANCoderStatusFrame.SensorData, 10, timeout_ms)
 
         # Configure Talon
-        self.talon = ctre.TalonFX(motorPort)
+        self.talon = phoenix5.TalonFX(motorPort)
         self.talon.configFactoryDefault()
-        self.talon.configSelectedFeedbackSensor(ctre.TalonFXFeedbackDevice.IntegratedSensor, pid_loop_idx, timeout_ms)
+        self.talon.configSelectedFeedbackSensor(phoenix5.TalonFXFeedbackDevice.IntegratedSensor, pid_loop_idx, timeout_ms)
         self.talon.configNeutralDeadband(0.01, timeout_ms)
         self.talon.setSensorPhase(True)
         self.talon.setInverted(True)
-        self.talon.setStatusFramePeriod(ctre.StatusFrameEnhanced.Status_13_Base_PIDF0, 10, timeout_ms)
-        self.talon.setStatusFramePeriod(ctre.StatusFrameEnhanced.Status_10_MotionMagic, 10, timeout_ms)
+        self.talon.setStatusFramePeriod(phoenix5.StatusFrameEnhanced.Status_13_Base_PIDF0, 10, timeout_ms)
+        self.talon.setStatusFramePeriod(phoenix5.StatusFrameEnhanced.Status_10_MotionMagic, 10, timeout_ms)
         self.talon.configNominalOutputForward(0, timeout_ms)
         self.talon.configNominalOutputReverse(0, timeout_ms)
         self.talon.configPeakOutputForward(1, timeout_ms)
@@ -112,12 +112,12 @@ class motor_poc(wpilib.TimedRobot):
         # Set Sensor Position to match Absolute Position of CANCoder
         self.talon.setSelectedSensorPosition(getShaftTicks(self.encoder.getAbsolutePosition(), "position"), pid_loop_idx, timeout_ms)
         self.talon.configVoltageCompSaturation(nominal_voltage, timeout_ms)
-        currentLimit = ctre.SupplyCurrentLimitConfiguration()
+        currentLimit = phoenix5.SupplyCurrentLimitConfiguration()
         currentLimit.enable = True
         currentLimit.currentLimit = steer_current_limit
         self.talon.configSupplyCurrentLimit(currentLimit, timeout_ms)
         self.talon.enableVoltageCompensation(True)
-        self.talon.setNeutralMode(ctre.NeutralMode.Brake)
+        self.talon.setNeutralMode(phoenix5.NeutralMode.Brake)
         
         # Keep track of position
         self.targetPosition = 0
@@ -189,7 +189,7 @@ class motor_poc(wpilib.TimedRobot):
 
         print(f"ABS Target: {self.targetPosition}    Motor Target: {newMotorPosition}    Motor Current: {motorPosition}    ABS Current: {absolutePosition}")
         
-        self.talon.set(ctre.TalonFXControlMode.MotionMagic, getShaftTicks(newMotorPosition, "position"))
+        self.talon.set(phoenix5.TalonFXControlMode.MotionMagic, getShaftTicks(newMotorPosition, "position"))
 
     def teleopExit(self) -> None:
         logging.info("Exiting Teleop")

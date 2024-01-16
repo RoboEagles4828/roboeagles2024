@@ -72,29 +72,35 @@ class DriveSubsystem(Subsystem):
     
     def getRobotRelativeChassisSpeeds(self):
         return self.drivetrain.kinematics.toChassisSpeeds(
-            self.drivetrain.front_left.getState(),
-            self.drivetrain.front_right.getState(),
-            self.drivetrain.rear_left.getState(),
-            self.drivetrain.rear_right.getState()
+            (
+                self.drivetrain.front_left.getState(),
+                self.drivetrain.front_right.getState(),
+                self.drivetrain.rear_left.getState(),
+                self.drivetrain.rear_right.getState()
+            )
         )
     
     def resetOdometry(self, pose):
         self.odometer.resetPosition(
             -self.drivetrain.navx.getRotation2d(),
-            pose,
-            self.drivetrain.front_left.getPosition(),
-            self.drivetrain.front_right.getPosition(),
-            self.drivetrain.rear_left.getPosition(),
-            self.drivetrain.rear_right.getPosition()
+            (
+                self.drivetrain.front_left.getPosition(),
+                self.drivetrain.front_right.getPosition(),
+                self.drivetrain.rear_left.getPosition(),
+                self.drivetrain.rear_right.getPosition()
+            ),
+            pose
         )
             
     def updateOdometry(self):
         self.odometer.update(
             -self.drivetrain.navx.getRotation2d(),
-            self.drivetrain.front_left.getPosition(),
-            self.drivetrain.front_right.getPosition(),
-            self.drivetrain.rear_left.getPosition(),
-            self.drivetrain.rear_right.getPosition()
+            (
+                self.drivetrain.front_left.getPosition(),
+                self.drivetrain.front_right.getPosition(),
+                self.drivetrain.rear_left.getPosition(),
+                self.drivetrain.rear_right.getPosition()
+            )
         )
 
     def getWheelEncoderPositions(self):

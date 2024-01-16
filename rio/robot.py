@@ -320,7 +320,7 @@ class Robot(wpilib.TimedRobot):
         
         # self.drive_train.swerveDriveAuton(object_pos[0]/5.0, object_pos[1]/5.0, object_pos[2]/5.0)
         
-        # logging.info(f"Robot Pose: {self.auton_selector.drive_subsystem.getPose()}")
+        logging.info(f"Robot Pose: {self.auton_selector.drive_subsystem.getPose()}")
         
         fms_attached = wpilib.DriverStation.isFMSAttached()
         if self.use_threading:

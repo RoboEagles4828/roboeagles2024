@@ -10,8 +10,8 @@
       "style": "0",
       "userScale": "2",
       "width": "1280",
-      "xpos": "458",
-      "ypos": "354"
+      "xpos": "2304",
+      "ypos": "191"
     }
   },
   "Window": {
@@ -22,13 +22,18 @@
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "250,465",
+      "Pos": "102,400",
       "Size": "796,73"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "250,277",
+      "Pos": "98,185",
       "Size": "750,185"
+    },
+    "###NetworkTables Info": {
+      "Collapsed": "0",
+      "Pos": "380,95",
+      "Size": "750,150"
     },
     "###Other Devices": {
       "Collapsed": "0",

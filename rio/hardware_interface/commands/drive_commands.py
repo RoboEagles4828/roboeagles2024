@@ -1,4 +1,4 @@
-from commands2 import CommandBase, SequentialCommandGroup, InstantCommand, PrintCommand, Swerve4ControllerCommand
+from commands2 import CommandBase, SequentialCommandGroup, InstantCommand, PrintCommand
 from wpilib import Timer
 import wpimath
 from wpimath import angleModulus
@@ -132,26 +132,26 @@ class SwerveTrajectoryCommand(SequentialCommandGroup):
         self.thetaController.enableContinuousInput(-math.pi, math.pi)
         self.addRequirements(self.drive)
         print(f"Callable {type(self.drive.getPose)}")
-        self.addCommands(
-            InstantCommand(
-                lambda: self.drive.resetOdometry(self.trajectory.sample(0).pose),
-                self.drive
-            ),
-            Swerve4ControllerCommand(
-                self.trajectory,
-                self.drive.getPose,
-                self.drive.getKinematics(),
-                self.xController,
-                self.yController,
-                self.thetaController,
-                self.drive.setModuleStates,
-                [self.drive]
-            ),
-            InstantCommand(
-                lambda: self.drive.swerve_drive(0, 0, 0, False),
-                self.drive
-            )
-        )
+        # self.addCommands(
+        #     InstantCommand(
+        #         lambda: self.drive.resetOdometry(self.trajectory.sample(0).pose),
+        #         self.drive
+        #     ),
+        #     Swerve4ControllerCommand(
+        #         self.trajectory,
+        #         self.drive.getPose,
+        #         self.drive.getKinematics(),
+        #         self.xController,
+        #         self.yController,
+        #         self.thetaController,
+        #         self.drive.setModuleStates,
+        #         [self.drive]
+        #     ),
+        #     InstantCommand(
+        #         lambda: self.drive.swerve_drive(0, 0, 0, False),
+        #         self.drive
+        #     )
+        # )
         
         
 

@@ -5,8 +5,8 @@ from wpimath.controller import ProfiledPIDControllerRadians
 from wpimath._controls._controls.trajectory import TrapezoidProfileRadians
 from hardware_interface.motion_magic import MotionMagic
 from hardware_interface import GeometryUtils
-import ctre
-import ctre.sensors
+import phoenix5
+import phoenix5.sensors
 import math
 import time
 import logging
@@ -186,9 +186,9 @@ class SwerveModule():
         self.axle_encoder_port = module_config["axle_encoder_port"]
         self.encoder_offset = module_config["encoder_offset"]
 
-        self.wheel_motor = ctre.WPI_TalonFX(self.wheel_joint_port, "rio")
-        self.axle_motor = ctre.WPI_TalonFX(self.axle_joint_port, "rio")
-        self.encoder = ctre.sensors.WPI_CANCoder(self.axle_encoder_port, "rio")
+        self.wheel_motor = phoenix5.WPI_TalonFX(self.wheel_joint_port, "rio")
+        self.axle_motor = phoenix5.WPI_TalonFX(self.axle_joint_port, "rio")
+        self.encoder = phoenix5.sensors.WPI_CANCoder(self.axle_encoder_port, "rio")
 
         self.last_wheel_vel_cmd = None
         self.last_axle_vel_cmd = None
@@ -213,10 +213,10 @@ class SwerveModule():
         
 
     def setupEncoder(self):
-        self.encoderconfig = ctre.sensors.CANCoderConfiguration()
-        self.encoderconfig.absoluteSensorRange = ctre.sensors.AbsoluteSensorRange.Unsigned_0_to_360
-        self.encoderconfig.initializationStrategy = ctre.sensors.SensorInitializationStrategy.BootToAbsolutePosition
-        self.encoder.setStatusFramePeriod(ctre.sensors.CANCoderStatusFrame.SensorData, 10, timeout_ms)
+        self.encoderconfig = phoenix5.sensors.CANCoderConfiguration()
+        self.encoderconfig.absoluteSensorRange = phoenix5.sensors.AbsoluteSensorRange.Unsigned_0_to_360
+        self.encoderconfig.initializationStrategy = phoenix5.sensors.SensorInitializationStrategy.BootToAbsolutePosition
+        self.encoder.setStatusFramePeriod(phoenix5.sensors.CANCoderStatusFrame.SensorData, 10, timeout_ms)
         
     def getMotorPosition(self):
         return getAxleRadians(self.axle_motor.getSelectedSensorPosition(), 'position')
@@ -234,8 +234,8 @@ class SwerveModule():
         # Direction and Sensors
         self.wheel_motor.setSensorPhase(WHEEL_DIRECTION)
         self.wheel_motor.setInverted(WHEEL_DIRECTION)
-        self.wheel_motor.configSelectedFeedbackSensor(ctre.FeedbackDevice.IntegratedSensor, slot_idx, timeout_ms)
-        self.wheel_motor.setStatusFramePeriod(ctre.StatusFrameEnhanced.Status_21_FeedbackIntegrated, 10, timeout_ms)
+        self.wheel_motor.configSelectedFeedbackSensor(phoenix5.FeedbackDevice.IntegratedSensor, slot_idx, timeout_ms)
+        self.wheel_motor.setStatusFramePeriod(phoenix5.StatusFrameEnhanced.Status_21_FeedbackIntegrated, 10, timeout_ms)
         
         # Peak and Nominal Outputs
         self.wheel_motor.configNominalOutputForward(0, timeout_ms)
@@ -254,20 +254,20 @@ class SwerveModule():
         self.wheel_motor.config_kD(0, wheel_pid_constants["kD"], timeout_ms)
         
         # Brake
-        self.wheel_motor.setNeutralMode(ctre.NeutralMode.Brake)
+        self.wheel_motor.setNeutralMode(phoenix5.NeutralMode.Brake)
 
         # Supply Current Limit
         supply_current_limit = 30
         supply_current_threshold = 40
         supply_current_threshold_time = 0.1
-        supply_current_limit_configs = ctre.SupplyCurrentLimitConfiguration(True, supply_current_limit, supply_current_threshold, supply_current_threshold_time)
+        supply_current_limit_configs = phoenix5.SupplyCurrentLimitConfiguration(True, supply_current_limit, supply_current_threshold, supply_current_threshold_time)
         self.wheel_motor.configSupplyCurrentLimit(supply_current_limit_configs, timeout_ms)
         
         # Stator Current Limit
         stator_current_limit = 60 # TerrorBytes/Yeti: 80 US: 40
         stator_current_threshold = 100 # TerrorBytes/Yeti: 120 US: 80
         stator_current_threshold_time = 0.1
-        stator_current_limit_configs = ctre.StatorCurrentLimitConfiguration(True, stator_current_limit, stator_current_threshold, stator_current_threshold_time)
+        stator_current_limit_configs = phoenix5.StatorCurrentLimitConfiguration(True, stator_current_limit, stator_current_threshold, stator_current_threshold_time)
         self.wheel_motor.configStatorCurrentLimit(stator_current_limit_configs, timeout_ms)
 
         # Velocity Ramp
@@ -282,8 +282,8 @@ class SwerveModule():
         # Direction and Sensors
         self.axle_motor.setSensorPhase(AXLE_DIRECTION)
         self.axle_motor.setInverted(AXLE_DIRECTION)
-        self.axle_motor.configSelectedFeedbackSensor(ctre.FeedbackDevice.IntegratedSensor, slot_idx, timeout_ms)
-        self.axle_motor.setStatusFramePeriod(ctre.StatusFrameEnhanced.Status_10_MotionMagic, 10, timeout_ms)
+        self.axle_motor.configSelectedFeedbackSensor(phoenix5.FeedbackDevice.IntegratedSensor, slot_idx, timeout_ms)
+        self.axle_motor.setStatusFramePeriod(phoenix5.StatusFrameEnhanced.Status_10_MotionMagic, 10, timeout_ms)
         self.axle_motor.setSelectedSensorPosition(getShaftTicks(self.getEncoderPosition(), "position"), pid_loop_idx, timeout_ms)
 
         # Peak and Nominal Outputs
@@ -307,7 +307,7 @@ class SwerveModule():
         self.axle_motor.enableVoltageCompensation(True)
 
         # Braking
-        self.axle_motor.setNeutralMode(ctre.NeutralMode.Brake)
+        self.axle_motor.setNeutralMode(phoenix5.NeutralMode.Brake)
 
         # Velocity Ramp Removed
         self.axle_motor.configClosedloopRamp(0)
@@ -317,27 +317,27 @@ class SwerveModule():
         supply_current_limit = 20
         supply_current_threshold = 40
         supply_current_threshold_time = 0.1
-        supply_current_limit_configs = ctre.SupplyCurrentLimitConfiguration(False, supply_current_limit, supply_current_threshold, supply_current_threshold_time)
+        supply_current_limit_configs = phoenix5.SupplyCurrentLimitConfiguration(False, supply_current_limit, supply_current_threshold, supply_current_threshold_time)
         self.axle_motor.configSupplyCurrentLimit(supply_current_limit_configs, timeout_ms)
 
         # Stator Current Limit
         stator_current_limit = 40
         stator_current_threshold = 80
         stator_current_threshold_time = 0.1
-        stator_current_limit_configs = ctre.StatorCurrentLimitConfiguration(False, stator_current_limit, stator_current_threshold, stator_current_threshold_time)
+        stator_current_limit_configs = phoenix5.StatorCurrentLimitConfiguration(False, stator_current_limit, stator_current_threshold, stator_current_threshold_time)
         self.axle_motor.configStatorCurrentLimit(stator_current_limit_configs, timeout_ms)
 
     def neutralize_module(self):
-        self.wheel_motor.set(ctre.TalonFXControlMode.PercentOutput, 0)
-        self.axle_motor.set(ctre.TalonFXControlMode.PercentOutput, 0)
+        self.wheel_motor.set(phoenix5.TalonFXControlMode.PercentOutput, 0)
+        self.axle_motor.set(phoenix5.TalonFXControlMode.PercentOutput, 0)
         
     def neutralize_wheel(self):
-        self.wheel_motor.set(ctre.TalonFXControlMode.PercentOutput, 0)
+        self.wheel_motor.set(phoenix5.TalonFXControlMode.PercentOutput, 0)
         
     def setMotors(self, wheel_motor_vel, axle_position):
         # WHEEL VELOCITY CONTROL
         wheel_vel = getWheelShaftTicks(wheel_motor_vel, "velocity")                                                                                            
-        self.wheel_motor.set(ctre.TalonFXControlMode.Velocity, wheel_vel)
+        self.wheel_motor.set(phoenix5.TalonFXControlMode.Velocity, wheel_vel)
         self.last_wheel_vel_cmd = wheel_vel
 
         # MOTION MAGIC CONTROL FOR AXLE POSITION
@@ -382,7 +382,7 @@ class SwerveModule():
 
         # Last, add the current existing loops that the motor has gone through.
         newAxlePosition += axle_motorPosition - axle_absoluteMotorPosition
-        self.axle_motor.set(ctre.TalonFXControlMode.MotionMagic, getShaftTicks(newAxlePosition, "position"))
+        self.axle_motor.set(phoenix5.TalonFXControlMode.MotionMagic, getShaftTicks(newAxlePosition, "position"))
         #logging.info(f'{self.wheel_joint_name} {newAxlePosition} {wheel_motor_vel}')
         # logging.info('WHEEL MOTOR VEL: ', wheel_vel)
 
@@ -393,7 +393,7 @@ class SwerveModule():
 
     def setVelocity(self, velocity):
         set_wheel_motor_vel = metersToRadians(velocity)
-        self.wheel_motor.set(ctre.TalonFXControlMode.Velocity, getWheelShaftTicks(set_wheel_motor_vel, "velocity"))
+        self.wheel_motor.set(phoenix5.TalonFXControlMode.Velocity, getWheelShaftTicks(set_wheel_motor_vel, "velocity"))
 
     def getEncoderData(self):
         output = [
