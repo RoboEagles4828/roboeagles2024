@@ -56,10 +56,13 @@ RUN /opt/install-scripts/install-common ${INSTALL_COMMON}
 # Docker CLI #
 ##############
 
-# Copy and isntall docker
+# Copy and install docker
 COPY install-scripts/install-docker /opt/install-scripts/install-docker
 RUN chmod +x /opt/install-scripts/install-docker
 RUN /opt/install-scripts/install-docker ${INSTALL_DOCKER}
+
+# Copy tmp folder (src and pyproject.toml) into docker
+COPY tmp /tmp/
 
 # Add docker group
 RUN groupadd --system docker
@@ -68,7 +71,6 @@ RUN usermod -aG docker ${USERNAME}
 ################
 # Install RTAB #
 ################
-
 
 COPY install-scripts/install-rtab /opt/install-scripts/install-rtab
 RUN chmod +x /opt/install-scripts/install-rtab
@@ -84,7 +86,6 @@ USER root
 # Copy and install workspace rosdeps
 COPY install-scripts/install-rosdeps /opt/install-scripts/install-rosdeps
 RUN chmod +x /opt/install-scripts/install-rosdeps
-COPY src /tmp/src
 USER ${USERNAME}
 RUN /opt/install-scripts/install-rosdeps
 USER root

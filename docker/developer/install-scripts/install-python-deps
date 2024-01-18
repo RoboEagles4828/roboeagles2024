@@ -10,9 +10,12 @@ fi
 echo -e "\e[93mInstalling Python Dependencies\e[0m"
 
 pip install rticonnextdds-connector \
-    robotpy==2022.4.8 \
-    robotpy[ctre] \
-    robotpy[all] \
-    robotpy[commands2] \
-    robotpy[navx] \
-    wpilib==2022.4.1.6
+    packaging==23.2 \
+    robotpy==2024.1.1.3 \
+
+# Go into temp directory, read the pyproject.toml, and syncronize it with robotpy cli
+pushd /tmp/rio
+python3 -m robotpy sync
+popd
+
+rm -rf /tmp/rio
