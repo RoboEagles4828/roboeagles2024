@@ -49,8 +49,8 @@ class TurnToAngleCommand(CommandBase):
         super().__init__()
         self.drive = drive
         self.angle = angle
-        self.pid_constraints = TrapezoidProfileRadians.Constraints(2*math.pi, 2*math.pi)
-        self.turnPID = ProfiledPIDControllerRadians(1, 0, 0, self.pid_constraints)
+        self.pid_constraints = TrapezoidProfileRadians.Constraints(2.5*math.pi, 2.5*math.pi)
+        self.turnPID = ProfiledPIDControllerRadians(1.5, 0, 0, self.pid_constraints)
         self.turnPID.setTolerance(math.radians(1))
         self.addRequirements(self.drive)
 

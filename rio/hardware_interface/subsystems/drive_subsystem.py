@@ -2,6 +2,7 @@ from commands2 import Subsystem
 from wpimath.kinematics import ChassisSpeeds, SwerveDrive4Odometry, SwerveModuleState
 from wpimath.geometry import Rotation2d, Pose2d, Translation2d
 from hardware_interface.drivetrain import DriveTrain
+import math
 
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import HolonomicPathFollowerConfig, ReplanningConfig, PIDConstants
@@ -32,7 +33,7 @@ class DriveSubsystem(Subsystem):
             HolonomicPathFollowerConfig( # HolonomicPathFollowerConfig, this should likely live in your Constants class
                 PIDConstants(4.0, 0.0, 0.0), # Translation PID constants
                 PIDConstants(4.0, 0.0, 0.0), # Rotation PID constants
-                1.0, # Max module speed, in m/s
+                2.00, # Max module speed, in m/s
                 0.3683, # Drive base radius in meters. Distance from robot center to furthest module.
                 ReplanningConfig() # Default path replanning config. See the API for the options here
             ),
@@ -43,7 +44,8 @@ class DriveSubsystem(Subsystem):
         self.robot_center = Translation2d(0, 0)
 
     def pathFlip(self):
-        return DriverStation.getAlliance() == DriverStation.Alliance.kRed
+        return False
+        # return DriverStation.getAlliance() == DriverStation.Alliance.kRed
 
     def swerve_drive(self, x, y, z, field_oriented):
         self.updateOdometry()
@@ -53,7 +55,7 @@ class DriveSubsystem(Subsystem):
             self.drivetrain.swerveDriveAuton(x, y, z)
 
     def driveRobotRelativePathPlanner(self, speeds: ChassisSpeeds):
-        self.drivetrain.swerveDrivePath(speeds.vx, speeds.vy, speeds.omega, 1.0, 1.0, 1.0)
+        self.drivetrain.swerveDrivePath(speeds.vx, speeds.vy, speeds.omega, 1.0)
             
     def setModuleStates(self, states: list[SwerveModuleState]):
         self.updateOdometry()
@@ -94,7 +96,7 @@ class DriveSubsystem(Subsystem):
             
     def updateOdometry(self):
         self.odometer.update(
-            -self.drivetrain.navx.getRotation2d(),
+            Rotation2d.fromDegrees(-self.drivetrain.navx.getAngle()),
             (
                 self.drivetrain.front_left.getPosition(),
                 self.drivetrain.front_right.getPosition(),

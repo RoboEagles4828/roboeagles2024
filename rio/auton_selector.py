@@ -11,6 +11,7 @@ from pathplannerlib.auto import AutoBuilder, PathPlannerAuto
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
 from commands2 import Command
+from commands2 import WaitCommand, SequentialCommandGroup
 
 from typing import List
 
@@ -46,6 +47,10 @@ class AutonSelector():
         self.autonChooser.addOption("Trajectory Auton", self.TRAJ)
         self.autonChooser.setDefaultOption("Pathplanner Auton", self.PATHPLANNER)
 
+        self.ppchooser = wpilib.SendableChooser()
+        self.ppchooser.addOption("TestAuto", "TestAuto")
+        self.ppchooser.addOption("TestNoTurnAuto", "TestNoTurnAuto")
+
         self.selected = self.autonChooser.getSelected()
 
         self.start = 0
@@ -59,6 +64,7 @@ class AutonSelector():
 
     def run(self):
         self.selected = self.autonChooser.getSelected()
+        self.pp = self.ppchooser.getSelected()
         
         autons = {
             self.TAXI: self.taxi_auton("clean"),
@@ -69,7 +75,7 @@ class AutonSelector():
             # self.CHARGE: self.charge_auton(),
             # self.HIGH_CHARGE: self.high_charge_auton(),
             self.TRAJ: self.trajectory_auton(),
-            self.PATHPLANNER: self.pathplannerAuton("TestAuto")
+            self.PATHPLANNER: self.pathplannerAuton(self.pp)
         }
         
         self.command = autons[self.selected]
@@ -88,10 +94,11 @@ class AutonSelector():
         #     waypoints
         # )
 
-        trajectory_command = TurnToAngleCommand(self.drive_subsystem, 90.0)
+        trajectory_command = SequentialCommandGroup(
+            TurnToAngleCommand(self.drive_subsystem, 180.0)
+        )
         
         return trajectory_command
-        pass
     
     def pathplannerAuton(self, auto):
         return PathPlannerAuto(auto)

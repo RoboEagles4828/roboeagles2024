@@ -4,6 +4,7 @@ from hardware_interface.joystick import Joystick
 from hardware_interface.armcontroller import ArmController
 from commands2 import *
 import wpilib
+from wpilib import Field2d
 from wpilib.shuffleboard import Shuffleboard
 from wpilib.shuffleboard import SuppliedFloatValueWidget
 from hardware_interface.commands.drive_commands import *
@@ -251,29 +252,41 @@ class Robot(wpilib.TimedRobot):
         self.shuffleboard = Shuffleboard.getTab("Main")
         self.shuffleboard.add(title="AUTON", defaultValue=self.auton_selector.autonChooser)
 
-        self.shuffleboard.add(title="JOYSTICK", defaultValue=self.joystick_selector)
+        # self.shuffleboard.add(title="JOYSTICK", defaultValue=self.joystick_selector)
 
-        self.shuffleboard.add("WHINE REMOVAL", self.drive_train.whine_remove_selector)
+        # self.shuffleboard.add("WHINE REMOVAL", self.drive_train.whine_remove_selector)
         self.shuffleboard.addDoubleArray("MOTOR VELOCITY", lambda: (self.drive_train.motor_vels))
         self.shuffleboard.addDoubleArray("MOTOR POSITIONS", lambda: (self.drive_train.motor_pos))
-        self.shuffleboard.add("ANGLE SOURCE", self.drive_train.angle_source_selector)
+        # self.shuffleboard.add("ANGLE SOURCE", self.drive_train.angle_source_selector)
 
-        self.shuffleboard.add("PROFILE", self.drive_train.profile_selector)
+        # self.shuffleboard.add("PROFILE", self.drive_train.profile_selector)
         self.shuffleboard.add("NAVX", self.drive_train.navx)
+        self.shuffleboard.add("PP Auton", self.auton_selector.ppchooser)
         self.shuffleboard.addDouble("YAW", lambda: (self.drive_train.navx.getYaw()))
         self.shuffleboard.addBoolean("FIELD ORIENTED", lambda: (self.drive_train.field_oriented_value))
-        self.shuffleboard.addBoolean("SLOW", lambda: (self.drive_train.slow))
+        # self.shuffleboard.addBoolean("SLOW", lambda: (self.drive_train.slow))
         self.shuffleboard.addDoubleArray("MOTOR TEMPS", lambda: (self.drive_train.motor_temps))
         self.shuffleboard.addDoubleArray("JOYSTICK OUTPUT", lambda: ([self.drive_train.linX, self.drive_train.linY, self.drive_train.angZ]))
         self.shuffleboard.addDoubleArray("POSE: ", lambda: ([self.auton_selector.drive_subsystem.getPose().X(), self.auton_selector.drive_subsystem.getPose().Y(), self.auton_selector.drive_subsystem.getPose().rotation().degrees()]))
-        self.shuffleboard.addString("AUTO TURN STATE", lambda: (self.drive_train.auto_turn_value))
-        
-        self.second_order_chooser = wpilib.SendableChooser()
-        self.second_order_chooser.setDefaultOption("1st Order", False)
-        self.second_order_chooser.addOption("2nd Order", True)
-        
-        self.shuffleboard.add("2nd Order", self.second_order_chooser)
 
+        self.shuffleboard.add("PP Chooser", self.auton_selector.ppchooser)
+
+        self.shuffleboard.addDouble("Pose X", lambda: self.auton_selector.drive_subsystem.getPose().X())
+        self.shuffleboard.addDouble("Pose Y", lambda: self.auton_selector.drive_subsystem.getPose().Y())
+        self.shuffleboard.addDouble("Pose Rotation", lambda: self.auton_selector.drive_subsystem.getPose().rotation().degrees())
+        self.shuffleboard.addDouble("Sweeping Rotation", lambda: self.auton_selector.drive_subsystem.drivetrain.navx.getRotation2d().__mul__(-1).degrees())
+        self.shuffleboard.addDoubleArray("CHASSIS SPEEDS", lambda: [
+            self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().vx,
+            self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().vy,
+            self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().omega
+        ])
+        # self.shuffleboard.addString("AUTO TURN STATE", lambda: (self.drive_train.auto_turn_value))
+        
+        # self.second_order_chooser = wpilib.SendableChooser()
+        # self.second_order_chooser.setDefaultOption("1st Order", False)
+        # self.second_order_chooser.addOption("2nd Order", True)
+        
+        # self.shuffleboard.add("2nd Order", self.second_order_chooser)
         self.arm_controller.setToggleButtons()
         
         self.auton_run = False

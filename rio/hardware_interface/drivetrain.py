@@ -444,7 +444,7 @@ class SwerveModule():
     
     def getState(self) -> SwerveModuleState:
         return SwerveModuleState(
-            self.wheel_motor.getSelectedSensorVelocity() * self.DRIVE_CONVERSION,
+            self.wheel_motor.getSelectedSensorVelocity() * self.DRIVE_CONVERSION * 10, 
             Rotation2d(self.getEncoderPosition())
         )
     
@@ -471,7 +471,7 @@ class DriveTrain():
         self.wheel_radius = 0.0508
 
         self.ROBOT_MAX_TRANSLATIONAL = 7.0 #16.4041995 # 5.0 # m/s
-        self.ROBOT_MAX_ROTATIONAL = 2.5 #16.4041995 * math.pi #rad/s
+        self.ROBOT_MAX_ROTATIONAL = 2.5 * math.pi #16.4041995 * math.pi #rad/s
 
         self.MODULE_MAX_SPEED = 7.0 #16.4041995 # m/s
 
@@ -625,8 +625,8 @@ class DriveTrain():
         # linearY = self.slew_Y.calculate(math.pow(joystick.getData()["axes"][0], 5)) * -self.ROBOT_MAX_TRANSLATIONAL / self.move_scale_y
         # angularZ = self.slew_Z.calculate(math.pow(joystick.getData()["axes"][3], 5)) * self.ROBOT_MAX_ROTATIONAL / self.turn_scale
         
-        linearX = math.pow(joystick.getData()["axes"][1], 5) * self.ROBOT_MAX_TRANSLATIONAL / self.move_scale_x
-        linearY = math.pow(joystick.getData()["axes"][0], 5) * -self.ROBOT_MAX_TRANSLATIONAL / self.move_scale_y
+        linearX = math.pow(joystick.getData()["axes"][1], 5) * self.ROBOT_MAX_TRANSLATIONAL
+        linearY = math.pow(joystick.getData()["axes"][0], 5) * -self.ROBOT_MAX_TRANSLATIONAL 
         angularZ = math.pow(joystick.getData()["axes"][3], 5) * self.ROBOT_MAX_ROTATIONAL / self.turn_scale
 
         self.linX = linearX
@@ -648,12 +648,12 @@ class DriveTrain():
             self.slow = True
             self.move_scale_x = 1.0
             self.move_scale_y = 1.0
-            self.turn_scale = 1.0
+            self.turn_scale = 4.0
         else:            
             self.slow = False
             self.move_scale_x = 2.0
             self.move_scale_y = 2.0
-            self.turn_scale = 2.0
+            self.turn_scale = 1.0
 
         if joystick.getData()["axes"][6] == 1.0:
             self.auto_turn_value = "load"
@@ -786,10 +786,11 @@ class DriveTrain():
         
         return data
 
-    def swerveDrivePath(self, x, y, z, max_mod, maxt, maxr):
+    def swerveDrivePath(self, x, y, z, max_mod):
         self.speeds = ChassisSpeeds(x, -y, z)
         self.module_state = self.kinematics.toSwerveModuleStates(self.speeds)
-        self.kinematics.desaturateWheelSpeeds(self.module_state, self.speeds, max_mod, maxt, maxr)
+        self.kinematics.desaturateWheelSpeeds(self.module_state, max_mod)
+        # self.kinematics.desaturateWheelSpeeds(self.module_state, self.speeds, max_mod, maxt, maxr)
 
         self.front_left_state: SwerveModuleState = self.module_state[0]
         self.front_right_state: SwerveModuleState = self.module_state[1]

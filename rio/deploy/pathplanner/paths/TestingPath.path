@@ -8,7 +8,7 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.71,
+        "x": 0.1,
         "y": 0.0
       },
       "isLocked": false,
@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 1.0,
+        "x": 2.0,
         "y": 0.0
       },
       "prevControl": {
-        "x": 0.30000000000000004,
+        "x": 1.9000000000000004,
         "y": 0.0
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "TestEnd"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -33,13 +33,13 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 1.0,
-    "maxAcceleration": 0.5,
-    "maxAngularVelocity": 270.0,
-    "maxAngularAcceleration": 135.0
+    "maxAcceleration": 1.0,
+    "maxAngularVelocity": 180.0,
+    "maxAngularAcceleration": 180.0
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": 0.0,
+    "rotation": -90.0,
     "rotateFast": false
   },
   "reversed": false,
