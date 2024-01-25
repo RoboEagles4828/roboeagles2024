@@ -25,6 +25,8 @@ class DriveSubsystem(Subsystem):
             Pose2d(0, 0, Rotation2d(0))
         )
 
+        self.max_module_speed = 2.0
+
         AutoBuilder.configureHolonomic(
             self.getPose, # Robot pose supplier
             self.resetOdometry,
@@ -33,7 +35,7 @@ class DriveSubsystem(Subsystem):
             HolonomicPathFollowerConfig( # HolonomicPathFollowerConfig, this should likely live in your Constants class
                 PIDConstants(4.0, 0.0, 0.0), # Translation PID constants
                 PIDConstants(4.0, 0.0, 0.0), # Rotation PID constants
-                2.00, # Max module speed, in m/s
+                self.max_module_speed, # Max module speed, in m/s
                 0.3683, # Drive base radius in meters. Distance from robot center to furthest module.
                 ReplanningConfig() # Default path replanning config. See the API for the options here
             ),
@@ -55,7 +57,7 @@ class DriveSubsystem(Subsystem):
             self.drivetrain.swerveDriveAuton(x, y, z)
 
     def driveRobotRelativePathPlanner(self, speeds: ChassisSpeeds):
-        self.drivetrain.swerveDrivePath(speeds.vx, speeds.vy, speeds.omega, 1.0)
+        self.drivetrain.swerveDrivePath(speeds.vx, speeds.vy, speeds.omega, self.max_module_speed)
             
     def setModuleStates(self, states: list[SwerveModuleState]):
         self.updateOdometry()
