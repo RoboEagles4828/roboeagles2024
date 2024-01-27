@@ -4,6 +4,7 @@ from hardware_interface.joystick import Joystick
 from hardware_interface.armcontroller import ArmController
 from commands2 import *
 import wpilib
+from wpilib import Field2d
 from wpilib.shuffleboard import Shuffleboard
 from wpilib.shuffleboard import SuppliedFloatValueWidget
 from hardware_interface.commands.drive_commands import *
@@ -15,6 +16,8 @@ import inspect
 import logging
 import traceback
 import threading
+
+from pathplannerlib.auto import NamedCommands
 
 ENABLE_STAGE_BROADCASTER = True
 ENABLE_ENCODER = True
@@ -249,37 +252,56 @@ class Robot(wpilib.TimedRobot):
         self.shuffleboard = Shuffleboard.getTab("Main")
         self.shuffleboard.add(title="AUTON", defaultValue=self.auton_selector.autonChooser)
 
-        self.shuffleboard.add(title="JOYSTICK", defaultValue=self.joystick_selector)
+        # self.shuffleboard.add(title="JOYSTICK", defaultValue=self.joystick_selector)
 
-        self.shuffleboard.add("WHINE REMOVAL", self.drive_train.whine_remove_selector)
+        # self.shuffleboard.add("WHINE REMOVAL", self.drive_train.whine_remove_selector)
         self.shuffleboard.addDoubleArray("MOTOR VELOCITY", lambda: (self.drive_train.motor_vels))
         self.shuffleboard.addDoubleArray("MOTOR POSITIONS", lambda: (self.drive_train.motor_pos))
-        self.shuffleboard.add("ANGLE SOURCE", self.drive_train.angle_source_selector)
+        # self.shuffleboard.add("ANGLE SOURCE", self.drive_train.angle_source_selector)
 
-        self.shuffleboard.add("PROFILE", self.drive_train.profile_selector)
+        # self.shuffleboard.add("PROFILE", self.drive_train.profile_selector)
         self.shuffleboard.add("NAVX", self.drive_train.navx)
+        self.shuffleboard.add("PP Auton", self.auton_selector.ppchooser)
         self.shuffleboard.addDouble("YAW", lambda: (self.drive_train.navx.getYaw()))
         self.shuffleboard.addBoolean("FIELD ORIENTED", lambda: (self.drive_train.field_oriented_value))
-        self.shuffleboard.addBoolean("SLOW", lambda: (self.drive_train.slow))
+        # self.shuffleboard.addBoolean("SLOW", lambda: (self.drive_train.slow))
         self.shuffleboard.addDoubleArray("MOTOR TEMPS", lambda: (self.drive_train.motor_temps))
         self.shuffleboard.addDoubleArray("JOYSTICK OUTPUT", lambda: ([self.drive_train.linX, self.drive_train.linY, self.drive_train.angZ]))
-        self.shuffleboard.addString("AUTO TURN STATE", lambda: (self.drive_train.auto_turn_value))
-        
-        self.second_order_chooser = wpilib.SendableChooser()
-        self.second_order_chooser.setDefaultOption("1st Order", False)
-        self.second_order_chooser.addOption("2nd Order", True)
-        
-        self.shuffleboard.add("2nd Order", self.second_order_chooser)
+        self.shuffleboard.addDoubleArray("POSE: ", lambda: ([self.auton_selector.drive_subsystem.getPose().X(), self.auton_selector.drive_subsystem.getPose().Y(), self.auton_selector.drive_subsystem.getPose().rotation().degrees()]))
 
+        self.shuffleboard.add("PP Chooser", self.auton_selector.ppchooser)
+
+        self.shuffleboard.addDouble("Pose X", lambda: self.auton_selector.drive_subsystem.getPose().X())
+        self.shuffleboard.addDouble("Pose Y", lambda: self.auton_selector.drive_subsystem.getPose().Y())
+        self.shuffleboard.addDouble("Pose Rotation", lambda: self.auton_selector.drive_subsystem.getPose().rotation().degrees())
+        self.shuffleboard.addDouble("Sweeping Rotation", lambda: self.auton_selector.drive_subsystem.drivetrain.navx.getRotation2d().__mul__(-1).degrees())
+        self.shuffleboard.addDoubleArray("CHASSIS SPEEDS", lambda: [
+            self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().vx,
+            self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().vy,
+            self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().omega
+        ])
+        # self.shuffleboard.addString("AUTO TURN STATE", lambda: (self.drive_train.auto_turn_value))
+        
+        # self.second_order_chooser = wpilib.SendableChooser()
+        # self.second_order_chooser.setDefaultOption("1st Order", False)
+        # self.second_order_chooser.addOption("2nd Order", True)
+        
+        # self.shuffleboard.add("2nd Order", self.second_order_chooser)
         self.arm_controller.setToggleButtons()
         
-        self.load_cmd = TurnToAngleCommand(self.auton_selector.drive_subsystem, 0, False)
-        self.score_cmd = TurnToAngleCommand(self.auton_selector.drive_subsystem, 180, False)
-        
         self.auton_run = False
+        
+        self.turn_90 = TurnToAngleCommand(self.auton_selector.drive_subsystem, 90.0)
+        self.turn_180 = TurnToAngleCommand(self.auton_selector.drive_subsystem, 180.0)
+        self.turn_270 = TurnToAngleCommand(self.auton_selector.drive_subsystem, 270.0)
+        self.turn_0 = TurnToAngleCommand(self.auton_selector.drive_subsystem, 0.0)
+
+        NamedCommands.registerCommand("Turn180", self.turn_180)
+
 
     def robotPeriodic(self):
         self.joystick.type = self.joystick_selector.getSelected()
+        self.auton_selector.drive_subsystem.updateOdometry()
         if navx_sim_data is not None:
             self.drive_train.navx_sim.update(*navx_sim_data)
 
@@ -288,15 +310,14 @@ class Robot(wpilib.TimedRobot):
     def autonomousInit(self):
         self.drive_train.navx.reset()
         self.drive_train.set_navx_offset(0)
-        # self.auton_selector.run()
+        self.auton_selector.run()
         global object_pos
-        self.cone_move = ConeMoveAuton(self.auton_selector.drive_subsystem, object_pos)
+        # self.cone_move = ConeMoveAuton(self.auton_selector.drive_subsystem, object_pos)
         logging.info("Entering Auton")
         global frc_stage
         frc_stage = "AUTON"
 
     def autonomousPeriodic(self):
-        self.drive_train.set_navx_offset(180)
         CommandScheduler.getInstance().run()
         global object_pos       
         global fms_attached
@@ -310,7 +331,9 @@ class Robot(wpilib.TimedRobot):
         #     self.drive_train.swerveDriveAuton(0, 0, 0)
         #     self.drive_train.stop()(
         
-        self.drive_train.swerveDriveAuton(object_pos[0]/5.0, object_pos[1]/5.0, object_pos[2]/5.0)
+        # self.drive_train.swerveDriveAuton(object_pos[0]/5.0, object_pos[1]/5.0, object_pos[2]/5.0)
+        
+        logging.info(f"Robot Pose: {self.auton_selector.drive_subsystem.getPose()}")
         
         fms_attached = wpilib.DriverStation.isFMSAttached()
         if self.use_threading:
@@ -328,28 +351,14 @@ class Robot(wpilib.TimedRobot):
     # Teleop
     def teleopInit(self):
         self.arm_controller.setToggleButtons()
-        self.drive_train.reset_slew()
-        self.drive_train.unlockDrive()
         CommandScheduler.getInstance().cancelAll()
         logging.info("Entering Teleop")
         global frc_stage
         frc_stage = "TELEOP"
 
     def teleopPeriodic(self):
-        dt.ENABLE_2ND_ORDER = self.second_order_chooser.getSelected()
-        if not self.load_cmd.isScheduled() and not self.score_cmd.isScheduled():
-            self.drive_train.swerveDrive(self.joystick)
+        self.drive_train.swerveDrive(self.joystick)
         self.arm_controller.setArm(self.joystick)
-        if self.drive_train.field_oriented_value and self.drive_train.auto_turn_value == "load":
-            self.load_cmd.setOtherVelocities((self.drive_train.linX, self.drive_train.linY))
-            self.load_cmd.schedule()
-            CommandScheduler.getInstance().run()
-        elif self.drive_train.field_oriented_value and self.drive_train.auto_turn_value == "score":
-            self.score_cmd.setOtherVelocities((self.drive_train.linX, self.drive_train.linY))
-            self.score_cmd.schedule()
-            CommandScheduler.getInstance().run()
-        else:
-            CommandScheduler.getInstance().cancelAll()
         global fms_attached
         fms_attached = wpilib.DriverStation.isFMSAttached()
         if self.use_threading:

@@ -1,6 +1,6 @@
 {
     "name": "roboeagles2024",
-    "image": "ghcr.io/roboeagles4828/developer-environment:7",
+    "image": "ghcr.io/roboeagles4828/developer-environment:10",
     "containerEnv": {
         "NVIDIA_VISIBLE_DEVICES": "all",
         "NVIDIA_DRIVER_CAPABILITIES": "all",

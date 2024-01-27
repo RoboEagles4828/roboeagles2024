@@ -1,5 +1,7 @@
 rticonnextdds-connector
-robotpy==2023.4.2.1
-robotpy[ctre]
-robotpy[commands2]
-wpilib==2023.4.2.0
+robotpy==2023.4.3.0
+robotpy[ctre]==2023.4.3.0
+robotpy[navx]==2023.4.3.0
+robotpy[commands2]==2023.4.3.0
+robotpy[pathplannerlib]==2023.4.3.0
+wpilib==2023.4.3.0

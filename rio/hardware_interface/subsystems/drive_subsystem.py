@@ -1,18 +1,112 @@
-from commands2 import SubsystemBase
-from wpimath.kinematics import ChassisSpeeds
+from commands2 import Subsystem
+from wpimath.kinematics import ChassisSpeeds, SwerveDrive4Odometry, SwerveModuleState
+from wpimath.geometry import Rotation2d, Pose2d, Translation2d
 from hardware_interface.drivetrain import DriveTrain
+import math
 
-class DriveSubsystem(SubsystemBase):
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.config import HolonomicPathFollowerConfig, ReplanningConfig, PIDConstants
+from wpilib import DriverStation
+
+class DriveSubsystem(Subsystem):
     def __init__(self, drivetrain: DriveTrain):
         super().__init__()
         self.drivetrain = drivetrain
         
+        self.odometer = SwerveDrive4Odometry(
+            self.drivetrain.kinematics, 
+            Rotation2d(0),
+            (
+                self.drivetrain.front_left.getPosition(),
+                self.drivetrain.front_right.getPosition(),
+                self.drivetrain.rear_left.getPosition(),
+                self.drivetrain.rear_right.getPosition()
+            ),
+            Pose2d(0, 0, Rotation2d(0))
+        )
+
+        self.max_module_speed = 2.0
+
+        AutoBuilder.configureHolonomic(
+            self.getPose, # Robot pose supplier
+            self.resetOdometry,
+            self.getRobotRelativeChassisSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            self.driveRobotRelativePathPlanner, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+            HolonomicPathFollowerConfig( # HolonomicPathFollowerConfig, this should likely live in your Constants class
+                PIDConstants(4.0, 0.0, 0.0), # Translation PID constants
+                PIDConstants(4.0, 0.0, 0.0), # Rotation PID constants
+                self.max_module_speed, # Max module speed, in m/s
+                0.3683, # Drive base radius in meters. Distance from robot center to furthest module.
+                ReplanningConfig() # Default path replanning config. See the API for the options here
+            ),
+            self.pathFlip, # Supplier to control path flipping based on alliance color
+            self # Reference to this subsystem to set requirements
+        )
+
+        self.robot_center = Translation2d(0, 0)
+
+    def pathFlip(self):
+        return False
+        # return DriverStation.getAlliance() == DriverStation.Alliance.kRed
+
     def swerve_drive(self, x, y, z, field_oriented):
+        self.updateOdometry()
         if field_oriented:
             self.drivetrain.swerveDriveAutonFieldOriented(x, y, z)
         else:
             self.drivetrain.swerveDriveAuton(x, y, z)
+
+    def driveRobotRelativePathPlanner(self, speeds: ChassisSpeeds):
+        self.drivetrain.swerveDrivePath(speeds.vx, speeds.vy, speeds.omega, self.max_module_speed)
             
+    def setModuleStates(self, states: list[SwerveModuleState]):
+        self.updateOdometry()
+        self.drivetrain.front_left.set(states[0])
+        self.drivetrain.front_right.set(states[1])
+        self.drivetrain.rear_left.set(states[2])
+        self.drivetrain.rear_right.set(states[3])
+            
+    def getPose(self):
+        pos = self.odometer.getPose()
+        return Pose2d(
+            pos.X(),
+            -pos.Y(),
+            pos.rotation()
+        )
+    
+    def getRobotRelativeChassisSpeeds(self):
+        return self.drivetrain.kinematics.toChassisSpeeds(
+            (
+                self.drivetrain.front_left.getState(),
+                self.drivetrain.front_right.getState(),
+                self.drivetrain.rear_left.getState(),
+                self.drivetrain.rear_right.getState()
+            )
+        )
+    
+    def resetOdometry(self, pose):
+        self.odometer.resetPosition(
+            -self.drivetrain.navx.getRotation2d(),
+            (
+                self.drivetrain.front_left.getPosition(),
+                self.drivetrain.front_right.getPosition(),
+                self.drivetrain.rear_left.getPosition(),
+                self.drivetrain.rear_right.getPosition()
+            ),
+            pose
+        )
+            
+    def updateOdometry(self):
+        self.odometer.update(
+            Rotation2d.fromDegrees(-self.drivetrain.navx.getAngle()),
+            (
+                self.drivetrain.front_left.getPosition(),
+                self.drivetrain.front_right.getPosition(),
+                self.drivetrain.rear_left.getPosition(),
+                self.drivetrain.rear_right.getPosition()
+            )
+        )
+
     def getWheelEncoderPositions(self):
         return [
             self.drivetrain.front_left.getEncoderData()[0]["position"],

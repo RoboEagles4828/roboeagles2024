@@ -1,4 +1,4 @@
-from ctre import TalonFX, TalonFXSimCollection
+from phoenix5 import TalonFX, TalonFXSimCollection
 from wpilib import RobotController
 import random
 import math

@@ -1,7 +1,7 @@
 
 import wpilib
 import wpilib.simulation
-import ctre
+import phoenix5
 from pyfrc.physics import drivetrains
 from pyfrc.physics.core import PhysicsInterface
 

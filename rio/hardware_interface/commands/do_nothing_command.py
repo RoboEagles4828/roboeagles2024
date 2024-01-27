@@ -1,4 +1,4 @@
-from commands2 import *
+from commands2 import CommandBase
 import logging
 
 class DoNothingCommand(CommandBase):

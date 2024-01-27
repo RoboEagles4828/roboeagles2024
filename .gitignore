@@ -4,7 +4,7 @@ log
 c_cpp_properties.json
 __pycache__
 nvidia_driver_config
-docker/developer/src
+docker/developer/tmp
 view_tmp.rviz
 .devcontainer/.env
 src/edna_description/urdf/edna.urdf

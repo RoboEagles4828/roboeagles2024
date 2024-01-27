@@ -1,7 +1,7 @@
 import wpilib
 import wpilib.simulation
-import ctre
-import ctre.sensors
+import phoenix5
+import phoenix5.sensors
 import time
 import logging
 import math
@@ -199,7 +199,7 @@ class ArmController():
     def setArm(self, joystick: Joystick):
         for button in self.toggle_buttons.values():
             button.toggle(joystick.getData()["buttons"])
-        # self.elevator.motor.set(ctre.ControlMode.PercentOutput, joystick.getData()["axes"][4])
+        # self.elevator.motor.set(phoenix5.ControlMode.PercentOutput, joystick.getData()["axes"][4])
 
     # Callback functions for toggle buttons (These were originally lambda functions inlined, but we decided this was more readable)
     def elevator_loading_station_on(self):
@@ -291,7 +291,7 @@ class Piston():
             logging.info(f"{self.name} Position: {position}")
 
 
-def commonTalonSetup(talon : ctre.WPI_TalonFX):
+def commonTalonSetup(talon : phoenix5.WPI_TalonFX):
     talon.configFactoryDefault(MOTOR_TIMEOUT)
     talon.configNeutralDeadband(0.01, MOTOR_TIMEOUT)
 
@@ -300,8 +300,8 @@ def commonTalonSetup(talon : ctre.WPI_TalonFX):
     talon.enableVoltageCompensation(True)
     
     # Sensor
-    talon.configSelectedFeedbackSensor(ctre.FeedbackDevice.IntegratedSensor, 0, MOTOR_TIMEOUT)
-    talon.configIntegratedSensorInitializationStrategy(ctre.sensors.SensorInitializationStrategy.BootToZero)
+    talon.configSelectedFeedbackSensor(phoenix5.FeedbackDevice.IntegratedSensor, 0, MOTOR_TIMEOUT)
+    talon.configIntegratedSensorInitializationStrategy(phoenix5.sensors.SensorInitializationStrategy.BootToZero)
 
     # PID
     talon.selectProfileSlot(MOTOR_PID_CONFIG['SLOT'], 0)
@@ -320,7 +320,7 @@ def commonTalonSetup(talon : ctre.WPI_TalonFX):
 
 class Intake():
     def __init__(self, port : int, min : float = 0.0, max : float = 1.0):
-        self.motor = ctre.WPI_TalonFX(port, "rio")
+        self.motor = phoenix5.WPI_TalonFX(port, "rio")
         commonTalonSetup(self.motor)
         self.state = 0
         self.min = min
@@ -331,9 +331,9 @@ class Intake():
         self.motor.setSensorPhase(False)
         self.motor.setInverted(False)
         # Frames
-        self.motor.setStatusFramePeriod(ctre.StatusFrameEnhanced.Status_13_Base_PIDF0, 10, MOTOR_TIMEOUT)
+        self.motor.setStatusFramePeriod(phoenix5.StatusFrameEnhanced.Status_13_Base_PIDF0, 10, MOTOR_TIMEOUT)
         # Brake
-        self.motor.setNeutralMode(ctre.NeutralMode.Brake)
+        self.motor.setNeutralMode(phoenix5.NeutralMode.Brake)
 
     def getPosition(self):
         percent = self.motor.getSelectedSensorPosition() / self.totalTicks
@@ -344,7 +344,7 @@ class Intake():
         return percent * (self.max - self.min) + self.min
 
     def stop(self):
-        self.motor.set(ctre.TalonFXControlMode.PercentOutput, 0)
+        self.motor.set(phoenix5.TalonFXControlMode.PercentOutput, 0)
 
     def setPosition(self, position : float):
         logging.info(f"Intake Position: {position}")
@@ -352,20 +352,20 @@ class Intake():
         # Moves the intake
         center = (self.max - self.min) / 2 + self.min
         if position >= center and self.state == 0:
-            self.motor.set(ctre.TalonFXControlMode.Velocity, -TICKS_PER_REVOLUTION/2)
+            self.motor.set(phoenix5.TalonFXControlMode.Velocity, -TICKS_PER_REVOLUTION/2)
             self.state = 1
         elif position < center and self.state == 1:
-            self.motor.set(ctre.TalonFXControlMode.Velocity, TICKS_PER_REVOLUTION/2)
+            self.motor.set(phoenix5.TalonFXControlMode.Velocity, TICKS_PER_REVOLUTION/2)
             self.state = 0
         
         if self.state == 0 and not self.motor.isFwdLimitSwitchClosed():
-            self.motor.set(ctre.TalonFXControlMode.Velocity, TICKS_PER_REVOLUTION/2)
+            self.motor.set(phoenix5.TalonFXControlMode.Velocity, TICKS_PER_REVOLUTION/2)
         elif self.state == 1 and not self.motor.isRevLimitSwitchClosed():
-            self.motor.set(ctre.TalonFXControlMode.Velocity, -TICKS_PER_REVOLUTION/2)
+            self.motor.set(phoenix5.TalonFXControlMode.Velocity, -TICKS_PER_REVOLUTION/2)
 
 class Elevator():
     def __init__(self, port : int, min : float = 0.0, max : float = 1.0):
-        self.motor = ctre.WPI_TalonFX(port, "rio")
+        self.motor = phoenix5.WPI_TalonFX(port, "rio")
         commonTalonSetup(self.motor)
         self.min = min
         self.max = max
@@ -375,7 +375,7 @@ class Elevator():
         self.motor.setSensorPhase(False)
         self.motor.setInverted(False)
         # Frames
-        self.motor.setStatusFramePeriod(ctre.StatusFrameEnhanced.Status_10_MotionMagic, 10, MOTOR_TIMEOUT)
+        self.motor.setStatusFramePeriod(phoenix5.StatusFrameEnhanced.Status_10_MotionMagic, 10, MOTOR_TIMEOUT)
         # Motion Magic
         self.motor.configMotionCruiseVelocity(MOTOR_PID_CONFIG['MAX_SPEED'], MOTOR_TIMEOUT) # Sets the maximum speed of motion magic (ticks/100ms)
         self.motor.configMotionAcceleration(MOTOR_PID_CONFIG['TARGET_ACCELERATION'], MOTOR_TIMEOUT) # Sets the maximum acceleration of motion magic (ticks/100ms)
@@ -390,13 +390,13 @@ class Elevator():
         return percent * (self.max - self.min) + self.min
 
     def stop(self):
-        self.motor.set(ctre.TalonFXControlMode.PercentOutput, 0)
+        self.motor.set(phoenix5.TalonFXControlMode.PercentOutput, 0)
 
     def setPosition(self, position : float):
         if position != self.lastCommand:
             logging.info(f"Elevator Position: {position}")
             percent = (position - self.min) / (self.max - self.min)
-            self.motor.set(ctre.TalonFXControlMode.MotionMagic, percent * self.totalTicks)
+            self.motor.set(phoenix5.TalonFXControlMode.MotionMagic, percent * self.totalTicks)
             self.lastCommand = position
         else:
             logging.info(f"Elevator Position: {position}")

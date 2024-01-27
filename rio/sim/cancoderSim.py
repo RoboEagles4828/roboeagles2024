@@ -1,4 +1,4 @@
-from ctre.sensors import CANCoder, CANCoderSimCollection
+from phoenix5.sensors import CANCoder, CANCoderSimCollection
 
 import math
 
