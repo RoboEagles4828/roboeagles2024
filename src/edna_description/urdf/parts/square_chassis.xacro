@@ -16,7 +16,7 @@
   <!-- 38.55535145 -->
   <xacro:macro name="square_chassis" params="prefix parent *origin">
     
-
+  
     <link name="${prefix}_chassis_link">
       <xacro:inertial_box mass="${chassis_weight}" x="${chassis_length}" y="${chassis_width}" z="${chassis_height}">
         <origin xyz="0 0 0" rpy="0 0 0" />
@@ -29,7 +29,7 @@
         <material name="red"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0" />
         <geometry>
           <box size="${chassis_length} ${chassis_width} ${chassis_height} " />
         </geometry>
