@@ -12,6 +12,8 @@ class DriveSubsystem(Subsystem):
     def __init__(self, drivetrain: DriveTrain):
         super().__init__()
         self.drivetrain = drivetrain
+
+        self.commanded_vel = ChassisSpeeds(0, 0, 0)
         
         self.odometer = SwerveDrive4Odometry(
             self.drivetrain.kinematics, 
@@ -25,7 +27,7 @@ class DriveSubsystem(Subsystem):
             Pose2d(0, 0, Rotation2d(0))
         )
 
-        self.max_module_speed = 2.0
+        self.max_module_speed = 4.5 # m/s
 
         AutoBuilder.configureHolonomic(
             self.getPose, # Robot pose supplier
@@ -34,7 +36,7 @@ class DriveSubsystem(Subsystem):
             self.driveRobotRelativePathPlanner, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             HolonomicPathFollowerConfig( # HolonomicPathFollowerConfig, this should likely live in your Constants class
                 PIDConstants(4.0, 0.0, 0.0), # Translation PID constants
-                PIDConstants(4.0, 0.0, 0.0), # Rotation PID constants
+                PIDConstants(5.0, 0.0, 0.0), # Rotation PID constants
                 self.max_module_speed, # Max module speed, in m/s
                 0.3683, # Drive base radius in meters. Distance from robot center to furthest module.
                 ReplanningConfig() # Default path replanning config. See the API for the options here
@@ -57,7 +59,11 @@ class DriveSubsystem(Subsystem):
             self.drivetrain.swerveDriveAuton(x, y, z)
 
     def driveRobotRelativePathPlanner(self, speeds: ChassisSpeeds):
+        self.commanded_vel = speeds
         self.drivetrain.swerveDrivePath(speeds.vx, speeds.vy, speeds.omega, self.max_module_speed)
+
+    def getCommandedVel(self):
+        return self.commanded_vel
             
     def setModuleStates(self, states: list[SwerveModuleState]):
         self.updateOdometry()
@@ -98,7 +104,7 @@ class DriveSubsystem(Subsystem):
             
     def updateOdometry(self):
         self.odometer.update(
-            Rotation2d.fromDegrees(-self.drivetrain.navx.getAngle()),
+            self.drivetrain.navx.getRotation2d().__mul__(-1),
             (
                 self.drivetrain.front_left.getPosition(),
                 self.drivetrain.front_right.getPosition(),

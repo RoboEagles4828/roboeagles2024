@@ -1,7 +1,7 @@
 import wpilib
 from wpimath.geometry._geometry import *
 from wpimath.kinematics import SwerveDrive4Kinematics, ChassisSpeeds, SwerveModuleState, SwerveModulePosition
-from wpimath.controller import ProfiledPIDControllerRadians
+from wpimath.controller import ProfiledPIDControllerRadians, PIDController
 from wpimath._controls._controls.trajectory import TrapezoidProfileRadians
 from hardware_interface.motion_magic import MotionMagic
 from hardware_interface import GeometryUtils
@@ -21,7 +21,7 @@ from collections import namedtuple
 
 NAMESPACE = 'real'
 
-ENABLE_2ND_ORDER = False
+ENABLE_2ND_ORDER = True
 
 # Small Gear Should Face the back of the robot
 # All wheel drive motors should not be inverted
@@ -222,7 +222,7 @@ class SwerveModule():
         return getAxleRadians(self.axle_motor.getSelectedSensorPosition(), 'position')
     
     def getEncoderPosition(self):
-        return math.radians(self.encoder.getPosition())
+        return math.radians(self.encoder.getAbsolutePosition())
     
     def getEncoderVelocity(self):
         return math.radians(self.encoder.getVelocity())
@@ -281,7 +281,7 @@ class SwerveModule():
         
         # Direction and Sensors
         self.axle_motor.setSensorPhase(AXLE_DIRECTION)
-        self.axle_motor.setInverted(AXLE_DIRECTION)
+        #self.axle_motor.setInverted(AXLE_DIRECTION)
         self.axle_motor.configSelectedFeedbackSensor(phoenix5.FeedbackDevice.IntegratedSensor, slot_idx, timeout_ms)
         self.axle_motor.setStatusFramePeriod(phoenix5.StatusFrameEnhanced.Status_10_MotionMagic, 10, timeout_ms)
         self.axle_motor.setSelectedSensorPosition(getShaftTicks(self.getEncoderPosition(), "position"), pid_loop_idx, timeout_ms)
@@ -546,6 +546,12 @@ class DriveTrain():
         self.front_right_state = SwerveModuleState(0, Rotation2d(0))
         self.rear_left_state = SwerveModuleState(0, Rotation2d(0))
         self.rear_right_state = SwerveModuleState(0, Rotation2d(0))
+
+        self.pid_constraints = TrapezoidProfileRadians.Constraints(2.5*math.pi, 2.5*math.pi)
+        self.yaw_correction = ProfiledPIDControllerRadians(0.0, 0, 0, self.pid_constraints)
+        self.correction_setpoint = self.navx.getRotation2d().radians()
+        self.yaw_correction.setTolerance(math.radians(1))
+        self.yaw_correction.setGoal(self.navx.getRotation2d().radians())
         
         self.is_sim = False
         self.locked = False
@@ -628,6 +634,12 @@ class DriveTrain():
         linearX = math.pow(joystick.getData()["axes"][1], 5) * self.ROBOT_MAX_TRANSLATIONAL
         linearY = math.pow(joystick.getData()["axes"][0], 5) * -self.ROBOT_MAX_TRANSLATIONAL 
         angularZ = math.pow(joystick.getData()["axes"][3], 5) * self.ROBOT_MAX_ROTATIONAL / self.turn_scale
+
+        # if math.pow(joystick.getData()["axes"][3], 5) == 0:
+        #     angularZ = self.yaw_correction.calculate(self.navx.getRotation2d().radians())
+        # else:
+        #     self.yaw_correction.setGoal(self.navx.getRotation2d().radians())
+        #     self.yaw_correction.reset(self.navx.getRotation2d().radians())
 
         self.linX = linearX
         self.linY = linearY
@@ -787,9 +799,9 @@ class DriveTrain():
         return data
 
     def swerveDrivePath(self, x, y, z, max_mod):
-        self.speeds = ChassisSpeeds(x, -y, z)
+        self.speeds = ChassisSpeeds.fromFieldRelativeSpeeds(x, -y, z, self.navx.getRotation2d())
         self.module_state = self.kinematics.toSwerveModuleStates(self.speeds)
-        self.kinematics.desaturateWheelSpeeds(self.module_state, max_mod)
+        # self.kinematics.desaturateWheelSpeeds(self.module_state, max_mod)
         # self.kinematics.desaturateWheelSpeeds(self.module_state, self.speeds, max_mod, maxt, maxr)
 
         self.front_left_state: SwerveModuleState = self.module_state[0]

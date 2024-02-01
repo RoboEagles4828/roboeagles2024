@@ -250,6 +250,7 @@ class Robot(wpilib.TimedRobot):
         self.auton_run = False
 
         self.shuffleboard = Shuffleboard.getTab("Main")
+        self.stats = Shuffleboard.getTab("Stats")
         self.shuffleboard.add(title="AUTON", defaultValue=self.auton_selector.autonChooser)
 
         # self.shuffleboard.add(title="JOYSTICK", defaultValue=self.joystick_selector)
@@ -280,6 +281,15 @@ class Robot(wpilib.TimedRobot):
             self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().vy,
             self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().omega
         ])
+
+        self.stats.addDouble("Actual X", lambda: (self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().vx))
+        self.stats.addDouble("Actual Y", lambda: (self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().vy))
+        self.stats.addDouble("Actual Omega", lambda: (self.auton_selector.drive_subsystem.getRobotRelativeChassisSpeeds().omega))
+
+        self.stats.addDouble("Command X", lambda: (self.auton_selector.drive_subsystem.getCommandedVel().vx))
+        self.stats.addDouble("Command Y", lambda: (self.auton_selector.drive_subsystem.getCommandedVel().vy))
+        self.stats.addDouble("Command Omega", lambda: (self.auton_selector.drive_subsystem.getCommandedVel().omega))
+
         # self.shuffleboard.addString("AUTO TURN STATE", lambda: (self.drive_train.auto_turn_value))
         
         # self.second_order_chooser = wpilib.SendableChooser()
@@ -322,6 +332,8 @@ class Robot(wpilib.TimedRobot):
         global object_pos       
         global fms_attached
         
+
+
         # dist = math.sqrt(object_pos[0]**2 + object_pos[1]**2)
         # if dist > 0.5:
         #     self.cone_move.execute()
@@ -333,7 +345,7 @@ class Robot(wpilib.TimedRobot):
         
         # self.drive_train.swerveDriveAuton(object_pos[0]/5.0, object_pos[1]/5.0, object_pos[2]/5.0)
         
-        logging.info(f"Robot Pose: {self.auton_selector.drive_subsystem.getPose()}")
+        # logging.info(f"Robot Pose: {self.auton_selector.drive_subsystem.getPose()}")
         
         fms_attached = wpilib.DriverStation.isFMSAttached()
         if self.use_threading:
