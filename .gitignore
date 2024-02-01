@@ -12,3 +12,4 @@ src/edna_description/urdf/edna.urdf
 .rsyncmetadataisaac/Eaglegym/eaglegym/runs/SwerveK/summaries
 isaac/Eaglegym/eaglegym/runs/SwerveK/summaries/
 .rsyncmetadata
+devcontainer.json
