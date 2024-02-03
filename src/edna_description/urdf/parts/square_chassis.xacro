@@ -26,7 +26,7 @@
         <geometry>
           <mesh filename="package://edna_description/meshes/RiftChassis.stl" scale="0.001 0.001 0.001" />
         </geometry>
-        <material name="red"/>
+        <material name="purple"/>
       </visual>
       <collision>
         <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0" />
@@ -36,7 +36,7 @@
       </collision>
     </link>
 
-    <link name="${prefix}_bumper_link">
+    <!-- <link name="${prefix}_bumper_link">
       <xacro:inertial_box mass="${bumper_weight}" x="${bumper_length}" y="${bumper_width}" z="${bumper_height}">
         <origin xyz="0 0 ${bumper_height/2 + 0.0127}" rpy="0 0 0" />
       </xacro:inertial_box>
@@ -53,7 +53,7 @@
           <box size="${bumper_length} ${bumper_width} ${bumper_height} " />
         </geometry>
       </collision>
-    </link>
+    </link> -->
 
     <joint name="${prefix}_chassis_joint" type="fixed">
       <parent link="${parent}" />
@@ -61,11 +61,11 @@
       <xacro:insert_block name="origin" />
     </joint>
 
-    <joint name="${prefix}_bumper_joint" type="fixed">
+    <!-- <joint name="${prefix}_bumper_joint" type="fixed">
       <parent link="${parent}" />
       <child link="${prefix}_bumper_link" />
       <xacro:insert_block name="origin" />
-    </joint>
+    </joint> -->
   </xacro:macro>
 
 </robot>
