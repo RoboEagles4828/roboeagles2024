@@ -37,6 +37,7 @@ launch_isaac() {
     -e "DISPLAY=:0" \
     -e "ROS_NAMESPACE=$ROS_NAMESPACE" \
     -e "FASTRTPS_DEFAULT_PROFILES_FILE=/isaac-sim/ros2_workspace/fastdds.xml" \
+    -v /dev:/dev:rw \
     -v /var/run/docker.sock:/var/run/docker.sock:rw \
     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
     -v /tmp/.docker.xauth:/tmp/.docker.xauth:rw \
