@@ -39,7 +39,7 @@
         
         <link name="${prefix}_wheel_link">
             <visual>
-                <origin xyz="0 -${wheel_pos_y} 0" rpy="0 ${pi/4} ${pi/2}" />
+                <origin xyz="0 ${wheel_pos_y} 0" rpy="${pi / 2} 0 ${pi / 4}" />
                 <geometry>
                     <mesh filename="package://edna_description/meshes/SwerveWheel.stl" scale="0.001 0.001 0.001" />
                 </geometry>
