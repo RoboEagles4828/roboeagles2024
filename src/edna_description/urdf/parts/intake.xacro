@@ -4,14 +4,32 @@
 
     <link name="intake_link">
         <visual>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-            <mesh filename="package://edna_description/meshes/RiftIntake.stl" scale="1 1 1" />
-        </geometry>
-        <material name="blue"/>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://edna_description/meshes/RiftIntake.stl" scale="1 1 1" />
+            </geometry>
+            <material name="blue"/>
         </visual>
+        <!-- Front plate collision -->
         <collision>
-            <!-- TODO: Add collision to sides with rectangles -->
+            <origin xyz="0 ${0.0254/2} 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.575 0.0254 0.102" />
+            </geometry>
+        </collision>
+        <!-- +Y side collision -->
+        <collision>
+            <origin xyz="${0.575/2+0.038/2} 0.065 0.007" rpy="0 0 0" />
+            <geometry>
+                <box size="0.038 0.127 0.22" />
+            </geometry>
+        </collision>
+        <!-- -Y side collision -->
+        <collision>
+            <origin xyz="${-0.575/2-0.038/2} 0.065 0.007" rpy="0 0 0" />
+            <geometry>
+                <box size="0.038 0.127 0.22" />
+            </geometry>
         </collision>
     </link>
 
