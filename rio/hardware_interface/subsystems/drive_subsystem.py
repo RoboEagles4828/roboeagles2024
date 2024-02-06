@@ -47,6 +47,8 @@ class DriveSubsystem(Subsystem):
 
         self.robot_center = Translation2d(0, 0)
 
+        self.last = ChassisSpeeds(0, 0, 0)
+
     def pathFlip(self):
         return False
         # return DriverStation.getAlliance() == DriverStation.Alliance.kRed
@@ -81,7 +83,7 @@ class DriveSubsystem(Subsystem):
         )
     
     def getRobotRelativeChassisSpeeds(self):
-        return self.drivetrain.kinematics.toChassisSpeeds(
+        speeds = self.drivetrain.kinematics.toChassisSpeeds(
             (
                 self.drivetrain.front_left.getState(),
                 self.drivetrain.front_right.getState(),
@@ -89,6 +91,8 @@ class DriveSubsystem(Subsystem):
                 self.drivetrain.rear_right.getState()
             )
         )
+        print(str(speeds.omega))
+        return speeds
     
     def resetOdometry(self, pose):
         self.odometer.resetPosition(

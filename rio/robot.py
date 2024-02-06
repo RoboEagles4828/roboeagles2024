@@ -321,6 +321,8 @@ class Robot(wpilib.TimedRobot):
         self.drive_train.navx.reset()
         self.drive_train.set_navx_offset(0)
         self.auton_selector.run()
+        self.auton_selector.drive_subsystem.resetOdometry(Pose2d(0, 0, Rotation2d(0)))
+        self.drive_train.navx.zeroYaw()
         global object_pos
         # self.cone_move = ConeMoveAuton(self.auton_selector.drive_subsystem, object_pos)
         logging.info("Entering Auton")
