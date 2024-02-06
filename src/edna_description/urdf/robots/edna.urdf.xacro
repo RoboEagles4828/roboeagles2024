@@ -18,6 +18,7 @@
   <xacro:include filename="$(find edna_description)/urdf/parts/gripper.xacro" />
   <xacro:include filename="$(find edna_description)/urdf/parts/slider.xacro" />
   <xacro:include filename="$(find edna_description)/urdf/parts/intake.xacro" />
+  <xacro:include filename="$(find edna_description)/urdf/parts/shooter.xacro" />
   <xacro:include filename="$(find edna_description)/urdf/parts/versaroller.xacro" />
 
   <!-- Axle Position Variables -->
@@ -49,6 +50,11 @@
   <xacro:intake parent="swerve_chassis_link">
     <origin xyz="0 -0.46 0.09" rpy="0 0 0" />
   </xacro:intake>
+
+  <xacro:shooter parent="swerve_chassis_link" prefix="shooter">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:shooter>
+  
 
 
   <!-- Drive Train -->
