@@ -799,7 +799,7 @@ class DriveTrain():
         return data
 
     def swerveDrivePath(self, x, y, z, max_mod):
-        self.speeds = ChassisSpeeds.fromFieldRelativeSpeeds(x, -y, z, self.navx.getRotation2d())
+        self.speeds = ChassisSpeeds(x, -y, z)
         self.module_state = self.kinematics.toSwerveModuleStates(self.speeds)
         # self.kinematics.desaturateWheelSpeeds(self.module_state, max_mod)
         # self.kinematics.desaturateWheelSpeeds(self.module_state, self.speeds, max_mod, maxt, maxr)
