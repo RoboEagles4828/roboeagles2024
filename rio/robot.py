@@ -16,6 +16,7 @@ import inspect
 import logging
 import traceback
 import threading
+from lib.mathlib.conversions import Conversions
 
 from pathplannerlib.auto import NamedCommands
 
