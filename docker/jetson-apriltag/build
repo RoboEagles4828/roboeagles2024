@@ -3,7 +3,7 @@ echo "ONLY USE THIS SCRIPT ON THE JETSON"
 
 VERSION=1
 GITHUB_REGISTRY="ghcr.io/roboeagles4828"
-IMAGE_NAME="jetson-zed"
+IMAGE_NAME="jetson-apriltag"
 
 docker build -t $GITHUB_REGISTRY/$IMAGE_NAME:$VERSION .
 
