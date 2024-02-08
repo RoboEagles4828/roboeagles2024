@@ -2,10 +2,9 @@ from wpilib import TimedRobot
 from commands2 import Command
 from commands2 import CommandScheduler
 from CTREConfigs import CTREConfigs
+from robot_container import RobotContainer
 
 class Robot(TimedRobot):
-  ctreConfigs = CTREConfigs()
-
   m_autonomousCommand: Command = None
 
   m_robotContainer: RobotContainer

@@ -7,11 +7,15 @@ from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from lib.mathlib.conversions import Conversions
 from lib.util.SwerveModuleConstants import SwerveModuleConstants
 from constants import Constants
-from robot import Robot
+from CTREConfigs import CTREConfigs
+from phoenix6.configs import CANcoderConfiguration
+from phoenix6.configs import TalonFXConfiguration
 
 from wpimath.units import radiansToRotations, rotationsToRadians
 
 class SwerveModule:
+    ctreConfigs = CTREConfigs()
+
     moduleNumber: int
     angleOffset: Rotation2d
 
@@ -31,14 +35,14 @@ class SwerveModule:
         self.angleOffset = moduleConstants.angleOffset
 
         self.angleEncoder = CANcoder(moduleConstants.cancoderID)
-        self.angleEncoder.configurator.apply(Robot.ctreConfigs.swerveCANcoderConfig)
+        self.angleEncoder.configurator.apply(self.ctreConfigs.swerveCANcoderConfig)
 
         self.mAngleMotor = TalonFX(moduleConstants.angleMotorID)
-        self.mAngleMotor.configurator.apply(Robot.ctreConfigs.swerveAngleFXConfig)
+        self.mAngleMotor.configurator.apply(self.ctreConfigs.swerveAngleFXConfig)
         self.resetToAbsolute()
 
         self.mDriveMotor = TalonFX(moduleConstants.driveMotorID)
-        self.mDriveMotor.configurator.apply(Robot.ctreConfigs.swerveDriveFXConfig)
+        self.mDriveMotor.configurator.apply(self.ctreConfigs.swerveDriveFXConfig)
         self.mDriveMotor.configurator.set_position(0.0)
 
     def setDesiredState(self, desiredState: SwerveModuleState, isOpenLoop: bool):
@@ -59,7 +63,7 @@ class SwerveModule:
         return Rotation2d(rotationsToRadians(self.angleEncoder.get_absolute_position().value_as_double))
 
     def resetToAbsolute(self):
-        absolutePosition = radiansToRotations(self.getCANcoder().radians()) - rotationsToRadians(self.angleOffset.radians())
+        absolutePosition = self.getCANcoder().radians() - self.angleOffset.radians()
         self.mAngleMotor.set_position(absolutePosition)
 
     def getState(self):

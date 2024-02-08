@@ -1,5 +1,5 @@
-from robot.constants import Constants
-from robot.subsystems.Swerve import Swerve
+from constants import Constants
+from subsystems.Swerve import Swerve
 
 from wpimath.controller import PIDController;
 from wpimath.controller import ProfiledPIDController;
@@ -39,8 +39,8 @@ class exampleAuto(SequentialCommandGroup):
 
         thetaController = \
             ProfiledPIDController(
-                Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
-        thetaController.enableContinuousInput(-Math.pi, Math.pi);
+                Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints)
+        thetaController.enableContinuousInput(-Math.pi, Math.pi)
 
         swerveControllerCommand = \
             SwerveControllerCommand(

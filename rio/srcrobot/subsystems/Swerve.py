@@ -1,5 +1,5 @@
-from robot.SwerveModule import SwerveModule
-from robot.constants import Constants
+from SwerveModule import SwerveModule
+from constants import Constants
 
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.kinematics import SwerveDrive4Kinematics
@@ -34,7 +34,7 @@ class Swerve(Subsystem):
 
         self.swerveOdometry = SwerveDrive4Odometry(Constants.Swerve.swerveKinematics, self.getGyroYaw(), self.getModulePositions())
 
-    def drive(self, translation: Translation2d, rotation: Rotation2d, fieldRelative, isOpenLoop):
+    def drive(self, translation: Translation2d, rotation, fieldRelative, isOpenLoop):
         swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
             ChassisSpeeds.fromFieldRelativeSpeeds(
                 translation.X(), 
@@ -43,9 +43,11 @@ class Swerve(Subsystem):
                 self.getHeading()
             )
         ) if fieldRelative else Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-            ChassisSpeeds(translation.getX(), translation.getY(), rotation)
+            ChassisSpeeds(translation.X(), translation.Y(), rotation)
         )
         SwerveDrive4Kinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed)
+
+        #print(f"FORWARD: {translation.X()}\nSTRAFE: {translation.Y()}\nROTATION: {rotation}\nFIELD RELATIVE: {fieldRelative}\nYAW: {self.getHeading()}")
 
         for mod in self.mSwerveMods:
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop)    
@@ -69,6 +71,9 @@ class Swerve(Subsystem):
             positions[mod.moduleNumber] = mod.getPosition()
         return positions
 
+    def getModules(self):
+        return self.mSwerveMods
+
     def getPose(self):
         return self.swerveOdometry.getPose()
 
@@ -85,7 +90,7 @@ class Swerve(Subsystem):
         self.swerveOdometry.resetPosition(self.getGyroYaw(), tuple(self.getModulePositions()), Pose2d(self.getPose().translation(), Rotation2d()))
 
     def getGyroYaw(self):
-        return Rotation2d.fromDegrees(self.gyro.getYaw())
+        return Rotation2d.fromDegrees(self.gyro.getYaw()).__mul__(-1)
 
     def resetModulesToAbsolute(self):
         for mod in self.mSwerveMods:
@@ -95,6 +100,6 @@ class Swerve(Subsystem):
         self.swerveOdometry.update(self.getGyroYaw(), tuple(self.getModulePositions()))
 
         for mod in self.mSwerveMods:
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", mod.getCANcoder().degrees())
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", mod.getPosition().angle.degrees())
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speed)
+            SmartDashboard.putNumber("Mod " + str(mod.moduleNumber) + " CANcoder", mod.getCANcoder().degrees())
+            SmartDashboard.putNumber("Mod " + str(mod.moduleNumber) + " Angle", mod.getPosition().angle.degrees())
+            SmartDashboard.putNumber("Mod " + str(mod.moduleNumber) + " Velocity", mod.getState().speed)

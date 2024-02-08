@@ -1,5 +1,5 @@
-from robot.constants import Constants
-from robot.subsystems.Swerve import Swerve
+from constants import Constants
+from subsystems.Swerve import Swerve
 
 from wpimath.geometry import Translation2d
 from commands2 import Command
@@ -30,6 +30,10 @@ class TeleopSwerve(Command):
         translationVal = applyDeadband(self.translationSup(), Constants.stickDeadband)
         strafeVal = applyDeadband(self.strafeSup(), Constants.stickDeadband)
         rotationVal = applyDeadband(self.rotationSup(), Constants.stickDeadband)
+
+        for mod in self.s_Swerve.getModules():
+            print(f"{mod.moduleNumber}: {mod.getCANcoder().radians()}")
+        print()
 
         # Drive
         self.s_Swerve.drive(

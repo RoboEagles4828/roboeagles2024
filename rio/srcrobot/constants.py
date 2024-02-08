@@ -10,6 +10,8 @@ from lib.util.COTSTalonFXSwerveConstants import COTSTalonFXSwerveConstants
 from lib.util.SwerveModuleConstants import SwerveModuleConstants
 import math
 
+from wpimath.units import rotationsToRadians
+
 class Constants:
     stickDeadband = 0.1
 
@@ -26,8 +28,8 @@ class Constants:
         # Swerve Kinematics 
         swerveKinematics = SwerveDrive4Kinematics(
             Translation2d(wheelBase / 2.0, trackWidth / 2.0),
-            Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
             Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
+            Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
             Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
         )
 
@@ -67,9 +69,9 @@ class Constants:
         driveKD = 0.0
         driveKF = 0.0
 
-        driveKS = 0.32
-        driveKV = 1.51
-        driveKA = 0.27
+        driveKS = 0.12
+        driveKV = 0.24
+        driveKA = 0.1
 
         # Swerve Profiling Values
         # Meters per Second
@@ -78,7 +80,7 @@ class Constants:
         maxAngularVelocity = 2.5 * math.pi
 
         # Neutral Modes
-        angleNeutralMode = NeutralModeValue.BRAKE
+        angleNeutralMode = NeutralModeValue.COAST
         driveNeutralMode = NeutralModeValue.BRAKE
 
         # Module Specific Constants
@@ -87,7 +89,7 @@ class Constants:
             driveMotorID = 3
             angleMotorID = 1
             canCoderID = 2
-            angleOffset = Rotation2d.fromDegrees(0.0)
+            angleOffset = Rotation2d(6.0116)
             constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
 
         # Front Right Module - Module 1
@@ -95,7 +97,7 @@ class Constants:
             driveMotorID = 6
             angleMotorID = 4
             canCoderID = 5
-            angleOffset = Rotation2d.fromDegrees(0.0)
+            angleOffset = Rotation2d(2.3686)
             constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         
         # Back Left Module - Module 2
@@ -103,7 +105,7 @@ class Constants:
             driveMotorID = 12
             angleMotorID = 10
             canCoderID = 11
-            angleOffset = Rotation2d.fromDegrees(0.0)
+            angleOffset = Rotation2d(2.9038)
             constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
 
         # Back Right Module - Module 3
@@ -111,7 +113,7 @@ class Constants:
             driveMotorID = 9
             angleMotorID = 7
             canCoderID = 8
-            angleOffset = Rotation2d.fromDegrees(0.0)
+            angleOffset = Rotation2d(0.1349)
             constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
 
     class AutoConstants:

@@ -1,6 +1,8 @@
 from phoenix6.configs import CANcoderConfiguration
 from phoenix6.configs import TalonFXConfiguration
 
+from phoenix6.signals.spn_enums import AbsoluteSensorRangeValue
+
 from constants import Constants
 
 class CTREConfigs:
@@ -11,6 +13,7 @@ class CTREConfigs:
     def __init__(self):
         # Swerve CANCoder Configuration
         self.swerveCANcoderConfig.magnet_sensor.sensor_direction = Constants.Swerve.cancoderInvert
+        self.swerveCANcoderConfig.magnet_sensor.absolute_sensor_range = AbsoluteSensorRangeValue.UNSIGNED_0_TO1
 
         #Swerve Angle Motor Configurations
         # Motor Inverts and Neutral Mode
