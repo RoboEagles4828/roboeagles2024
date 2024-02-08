@@ -43,6 +43,8 @@
       <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
     </inertial>
   </link>
+
+
   <xacro:square_chassis prefix="swerve" parent="base_link">
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:square_chassis>
@@ -52,11 +54,11 @@
     <origin xyz="0.46 0 0.09" rpy="0 0 ${pi/2}" />
   </xacro:intake>
 
-  <xacro:shooter parent="swerve_chassis_link" prefix="shooter">
-    <origin xyz="0 0 0" rpy="0 0 0" />
+  <!-- Shooter -->
+  <xacro:shooter prefix="shooter" parent="base_link">
+    <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+    <origin xyz="0.25 0 .33" rpy="0 ${-pi/6} 0" /> <!-- Made up values for shooter location & rotation. Change later. -->
   </xacro:shooter>
-  
-
 
   <!-- Drive Train -->
   <xacro:swerve_axle prefix="front_left" parent="swerve_chassis_link">
