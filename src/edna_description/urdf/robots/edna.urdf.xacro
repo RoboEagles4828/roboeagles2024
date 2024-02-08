@@ -20,6 +20,7 @@
   <xacro:include filename="$(find edna_description)/urdf/parts/intake.xacro" />
   <xacro:include filename="$(find edna_description)/urdf/parts/shooter.xacro" />
   <xacro:include filename="$(find edna_description)/urdf/parts/versaroller.xacro" />
+  <xacro:include filename="$(find edna_description)/urdf/parts/arm.xacro" />
 
   <!-- Axle Position Variables -->
   <xacro:property name="axle_pos" value="0.261523" />
@@ -48,6 +49,11 @@
   <xacro:square_chassis prefix="swerve" parent="base_link">
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:square_chassis>
+
+  <!-- Arm -->
+  <xacro:arm parent="base_link">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:arm>
 
   <!-- Intake -->
   <xacro:intake parent="swerve_chassis_link">

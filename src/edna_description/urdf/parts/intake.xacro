@@ -4,7 +4,7 @@
 
     <link name="intake_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0" />
+            <origin xyz="0 0 0" rpy="0 {pi}/2 0" />
             <geometry>
                 <mesh filename="package://edna_description/meshes/RiftIntake.stl" scale="1 1 1" />
             </geometry>
