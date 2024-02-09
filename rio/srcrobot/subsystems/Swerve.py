@@ -18,6 +18,10 @@ from commands2.subsystem import Subsystem
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.units import volts
 
+from pathplannerlib.auto import AutoBuilder
+
+from wpilib import DriverStation
+
 class Swerve(Subsystem):
     swerveOdometry: SwerveDrive4Odometry
     mSwerveMods: list[SwerveModule, SwerveModule, SwerveModule, SwerveModule]
@@ -37,6 +41,16 @@ class Swerve(Subsystem):
 
         self.swerveOdometry = SwerveDrive4Odometry(Constants.Swerve.swerveKinematics, self.getGyroYaw(), self.getModulePositions())
 
+        AutoBuilder.configureHolonomic(
+            self.getPose,
+            self.setPose,
+            self.getRobotRelativeSpeeds,
+            self.driveRobotRelative,
+            Constants.Swerve.holonomicPathConfig,
+            self.shouldFlipPath,
+            self
+        )
+
     def drive(self, translation: Translation2d, rotation, fieldRelative, isOpenLoop):
         swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
             ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -50,12 +64,16 @@ class Swerve(Subsystem):
         )
         SwerveDrive4Kinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed)
 
-        #print(f"FORWARD: {translation.X()}\nSTRAFE: {translation.Y()}\nROTATION: {rotation}\nFIELD RELATIVE: {fieldRelative}\nYAW: {self.getHeading()}")
-
         for mod in self.mSwerveMods:
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop)    
+    
+    def driveRobotRelative(self, speeds: ChassisSpeeds):
+        self.drive(Translation2d(speeds.vx, speeds.vy), speeds.omega, False, False)
 
-    # Used by SwerveControllerCommand in Auto
+    def shouldFlipPath(self):
+        return False
+        #return DriverStation.getAlliance() == DriverStation.Alliance.kBlue
+
     def setModuleStates(self, desiredStates):
         SwerveDrive4Kinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed)
         
@@ -98,6 +116,9 @@ class Swerve(Subsystem):
     def resetModulesToAbsolute(self):
         for mod in self.mSwerveMods:
             mod.resetToAbsolute()
+
+    def getRobotRelativeSpeeds(self):
+        return Constants.Swerve.swerveKinematics.toChassisSpeeds(tuple(self.getModuleStates()))
 
     def driveMotorsVoltage(self, volts):
         for mod in self.mSwerveMods:

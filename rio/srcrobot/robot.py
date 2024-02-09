@@ -4,15 +4,24 @@ from commands2 import CommandScheduler
 from CTREConfigs import CTREConfigs
 from robot_container import RobotContainer
 
+from wpilib.shuffleboard import Shuffleboard, ShuffleboardTab
+
 class Robot(TimedRobot):
   m_autonomousCommand: Command = None
 
   m_robotContainer: RobotContainer
 
+  auton_tab: ShuffleboardTab
+  teleop_tab: ShuffleboardTab
+
   def robotInit(self):
     # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     # autonomous chooser on the dashboard.
     self.m_robotContainer = RobotContainer()
+
+    self.auton_tab = Shuffleboard.getTab("Auton")
+    self.teleop_tab = Shuffleboard.getTab("Teleop")
+    
 
   def robotPeriodic(self):
     # Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled

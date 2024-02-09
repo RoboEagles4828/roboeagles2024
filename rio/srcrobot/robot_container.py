@@ -13,6 +13,11 @@ from subsystems.Swerve import Swerve
 
 from commands.SysId import DriveSysId
 
+from wpilib.shuffleboard import Shuffleboard, BuiltInWidgets, BuiltInLayouts
+from wpilib import SendableChooser
+
+from pathplannerlib.auto import PathPlannerAuto
+
 class RobotContainer:
     ctreConfigs = CTREConfigs()
     # Drive Controls
@@ -50,6 +55,16 @@ class RobotContainer:
             )
         )
 
+        self.auton = Shuffleboard.getTab("Auton")
+
+        self.auton_selector = SendableChooser()
+        self.auton_selector.setDefaultOption("Test Auto", PathPlannerAuto("TestAuto"))
+
+        self.auton.add("Auton Selector", self.auton_selector)\
+            .withWidget(BuiltInWidgets.kComboBoxChooser)\
+            .withSize(2, 1)\
+            .withPosition(0, 0)
+
         # Configure the button bindings
         self.configureButtonBindings()
 
@@ -64,7 +79,8 @@ class RobotContainer:
         self.zeroGyro.onTrue(InstantCommand(lambda: self.s_Swerve.zeroHeading()))
         self.robotCentric.onTrue(InstantCommand(lambda: self.toggleFieldOriented()))
 
-        self.sysId.whileTrue(self.driveSysId)
+        #TODO: Uncomment for sysid
+        # self.sysId.whileTrue(self.driveSysId)
 
 
     def toggleFieldOriented(self):
@@ -77,5 +93,5 @@ class RobotContainer:
      * @return the command to run in autonomous
     """
     def getAutonomousCommand(self) -> Command:
-        # An ExampleCommand will run in autonomous
-        return exampleAuto(self.s_Swerve)
+        auto = self.auton_selector.getSelected()
+        return auto

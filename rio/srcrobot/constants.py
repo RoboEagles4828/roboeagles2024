@@ -12,6 +12,10 @@ import math
 
 from wpimath.units import rotationsToRadians
 
+from pathplannerlib.auto import HolonomicPathFollowerConfig
+from pathplannerlib.controller import PIDConstants
+from pathplannerlib.config import ReplanningConfig
+
 class Constants:
     stickDeadband = 0.1
 
@@ -25,12 +29,19 @@ class Constants:
         wheelBase = Units.inchesToMeters(29.0)
         wheelCircumference = chosenModule.wheelCircumference
 
+        frontLeftLocation = Translation2d(wheelBase / 2.0, trackWidth / 2.0)
+        frontRightLocation = Translation2d(-wheelBase / 2.0, trackWidth / 2.0)
+        backLeftLocation = Translation2d(wheelBase / 2.0, -trackWidth / 2.0)
+        backRightLocation = Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
+
+        robotCenterLocation = Translation2d(0.0, 0.0)
+
         # Swerve Kinematics 
         swerveKinematics = SwerveDrive4Kinematics(
-            Translation2d(wheelBase / 2.0, trackWidth / 2.0),
-            Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-            Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
-            Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
+            frontLeftLocation, 
+            frontRightLocation, 
+            backLeftLocation, 
+            backRightLocation
         )
 
         # Module Gear Ratios
@@ -76,12 +87,22 @@ class Constants:
         # Swerve Profiling Values
         # Meters per Second
         maxSpeed = 5.0
+        maxAutoModuleSpeed = 4.5
         # Radians per Second
         maxAngularVelocity = 2.5 * math.pi
 
         # Neutral Modes
         angleNeutralMode = NeutralModeValue.COAST
         driveNeutralMode = NeutralModeValue.BRAKE
+
+        holonomicPathConfig = HolonomicPathFollowerConfig(
+            PIDConstants(4.0, 0.0, 0.0),
+            PIDConstants(4.0, 0.0, 0.0),
+            maxAutoModuleSpeed,
+            #distance from center to the furthest module
+            robotCenterLocation.distance(backLeftLocation),
+            ReplanningConfig(),
+        )
 
         # Module Specific Constants
         # Front Left Module - Module 0
@@ -118,9 +139,11 @@ class Constants:
 
     class AutoConstants:
         kMaxSpeedMetersPerSecond = 3
+        kMaxModuleSpeed = 4.5
         kMaxAccelerationMetersPerSecondSquared = 3
         kMaxAngularSpeedRadiansPerSecond = math.pi
         kMaxAngularSpeedRadiansPerSecondSquared = math.pi
+
         kPXController = 4.0
         kPYController = 4.0
         kPThetaController = 1.5
