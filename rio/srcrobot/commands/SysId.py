@@ -1,14 +1,12 @@
 from commands2.sysid import SysIdRoutine
-from commands2 import SequentialCommandGroup, InstantCommand, WaitCommand
+from commands2 import SequentialCommandGroup, InstantCommand, WaitCommand, Command
 from subsystems.Swerve import Swerve
 
-class DriveSysId(SequentialCommandGroup):
+class DriveSysId():
 
     routine: SysIdRoutine
 
     def __init__(self, s_Swerve: Swerve):
-        self.addCommands(s_Swerve)
-
         self.routine = SysIdRoutine(
             SysIdRoutine.Config(),
             SysIdRoutine.Mechanism(
@@ -19,17 +17,20 @@ class DriveSysId(SequentialCommandGroup):
             )
         )
 
+        self.swerve = s_Swerve
+
         self.quasiStaticForward = self.routine.quasistatic(SysIdRoutine.Direction.kForward)
         self.quasiStaticReverse = self.routine.quasistatic(SysIdRoutine.Direction.kReverse)
         self.dynamicForward = self.routine.dynamic(SysIdRoutine.Direction.kForward)
         self.dynamicReverse = self.routine.dynamic(SysIdRoutine.Direction.kReverse)
 
-        self.stop = InstantCommand(s_Swerve.stop, s_Swerve)
+        self.stop = InstantCommand(lambda: (s_Swerve.stop()), s_Swerve)
         self.waitTwoSeconds = WaitCommand(2)
 
-        self.resetAngleMotors = InstantCommand(s_Swerve.resetModulesToAbsolute)
+        self.resetAngleMotors = InstantCommand(lambda: (s_Swerve.resetModulesToAbsolute()), s_Swerve)
 
-        self.addCommands(
+    def getCommand(self):
+        return SequentialCommandGroup(
             self.resetAngleMotors,
             self.stop,
 

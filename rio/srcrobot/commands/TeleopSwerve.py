@@ -31,10 +31,6 @@ class TeleopSwerve(Command):
         strafeVal = applyDeadband(self.strafeSup(), Constants.stickDeadband)
         rotationVal = applyDeadband(self.rotationSup(), Constants.stickDeadband)
 
-        for mod in self.s_Swerve.getModules():
-            print(f"{mod.moduleNumber}: {mod.getCANcoder().radians()}")
-        print()
-
         # Drive
         self.s_Swerve.drive(
             Translation2d(translationVal, strafeVal).__mul__(Constants.Swerve.maxSpeed), 

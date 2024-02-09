@@ -56,6 +56,7 @@ class RobotContainer:
         )
 
         self.auton = Shuffleboard.getTab("Auton")
+        self.teleop = Shuffleboard.getTab("Teleop")
 
         self.auton_selector = SendableChooser()
         self.auton_selector.setDefaultOption("Test Auto", PathPlannerAuto("TestAuto"))
@@ -64,6 +65,28 @@ class RobotContainer:
             .withWidget(BuiltInWidgets.kComboBoxChooser)\
             .withSize(2, 1)\
             .withPosition(0, 0)
+        
+        self.teleop.addBoolean("Field Centric", lambda: not self.robotCentric_value)\
+            .withPosition(9, 0)\
+            .withSize(1, 1)\
+            .withWidget(BuiltInWidgets.kBooleanBox)
+        self.teleop.addBoolean("Zero Gyro", lambda: self.zeroGyro.getAsBoolean())\
+            .withPosition(10, 0)\
+            .withSize(1, 1)\
+            .withWidget(BuiltInWidgets.kBooleanBox)
+        self.teleop.addBoolean("SysId", lambda: self.sysId.getAsBoolean())\
+            .withPosition(11, 0)\
+            .withSize(1, 1)\
+            .withWidget(BuiltInWidgets.kBooleanBox)
+        self.teleop.add("Gyro", self.s_Swerve.gyro)\
+            .withPosition(0, 0)\
+            .withSize(2, 2)\
+            .withWidget(BuiltInWidgets.kGyro)
+        self.teleop.add("Swerve Subsystem", self.s_Swerve)\
+            .withPosition(0, 2)\
+            .withSize(3, 3)
+        
+        Shuffleboard.update()
 
         # Configure the button bindings
         self.configureButtonBindings()
@@ -80,7 +103,7 @@ class RobotContainer:
         self.robotCentric.onTrue(InstantCommand(lambda: self.toggleFieldOriented()))
 
         #TODO: Uncomment for sysid
-        # self.sysId.whileTrue(self.driveSysId)
+        # self.sysId.whileTrue(self.driveSysId.getCommand())
 
 
     def toggleFieldOriented(self):

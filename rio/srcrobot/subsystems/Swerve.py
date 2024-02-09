@@ -12,7 +12,7 @@ from wpimath.geometry import Pose2d
 from wpimath.geometry import Rotation2d
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveModuleState
-from wpilib import SmartDashboard
+from wpilib.shuffleboard import Shuffleboard, BuiltInWidgets
 from commands2.subsystem import Subsystem
 
 from wpilib.sysid import SysIdRoutineLog
@@ -50,6 +50,21 @@ class Swerve(Subsystem):
             self.shouldFlipPath,
             self
         )
+
+        for mod in self.mSwerveMods:
+            Shuffleboard.getTab("Diagnostics").addDouble("Mod " + str(mod.moduleNumber) + " CANcoder", mod.getCANcoder().degrees)\
+                .withPosition(0, mod.moduleNumber)\
+                .withSize(2, 1)\
+                .withWidget(BuiltInWidgets.kDial)
+            Shuffleboard.getTab("Diagnostics").addDouble("Mod " + str(mod.moduleNumber) + " Angle", mod.getPosition().angle.degrees)\
+                .withPosition(2, mod.moduleNumber)\
+                .withSize(2, 1)\
+                .withWidget(BuiltInWidgets.kDial)
+            Shuffleboard.getTab("Diagnostics").addDouble("Mod " + str(mod.moduleNumber) + " Velocity", lambda: mod.getState().speed)\
+                .withPosition(4, mod.moduleNumber)\
+                .withSize(2, 1)\
+                .withWidget(BuiltInWidgets.kNumberBar)
+            Shuffleboard.update()
 
     def drive(self, translation: Translation2d, rotation, fieldRelative, isOpenLoop):
         swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
@@ -137,8 +152,3 @@ class Swerve(Subsystem):
 
     def periodic(self):
         self.swerveOdometry.update(self.getGyroYaw(), tuple(self.getModulePositions()))
-
-        for mod in self.mSwerveMods:
-            SmartDashboard.putNumber("Mod " + str(mod.moduleNumber) + " CANcoder", mod.getCANcoder().degrees())
-            SmartDashboard.putNumber("Mod " + str(mod.moduleNumber) + " Angle", mod.getPosition().angle.degrees())
-            SmartDashboard.putNumber("Mod " + str(mod.moduleNumber) + " Velocity", mod.getState().speed)
