@@ -11,6 +11,8 @@ from autos.exampleAuto import exampleAuto
 from commands.TeleopSwerve import TeleopSwerve
 from subsystems.Swerve import Swerve
 
+from commands.SysId import DriveSysId
+
 class RobotContainer:
     ctreConfigs = CTREConfigs()
     # Drive Controls
@@ -24,10 +26,15 @@ class RobotContainer:
     zeroGyro = JoystickButton(driver, XboxController.Button.kBack)
     robotCentric = JoystickButton(driver, XboxController.Button.kStart)
 
+    sysId = JoystickButton(driver, XboxController.Button.kY)
+
     robotCentric_value = True
 
     # Subsystems
     s_Swerve : Swerve = Swerve()
+
+    #SysId
+    driveSysId = DriveSysId(s_Swerve)
 
 
     # The container for the robot. Contains subsystems, OI devices, and commands.
@@ -56,6 +63,9 @@ class RobotContainer:
         # Driver Buttons
         self.zeroGyro.onTrue(InstantCommand(lambda: self.s_Swerve.zeroHeading()))
         self.robotCentric.onTrue(InstantCommand(lambda: self.toggleFieldOriented()))
+
+        self.sysId.whileTrue(self.driveSysId)
+
 
     def toggleFieldOriented(self):
         self.robotCentric_value = not self.robotCentric_value

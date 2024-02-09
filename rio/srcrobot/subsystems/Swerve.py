@@ -15,6 +15,9 @@ from wpimath.kinematics import SwerveModuleState
 from wpilib import SmartDashboard
 from commands2.subsystem import Subsystem
 
+from wpilib.sysid import SysIdRoutineLog
+from wpimath.units import volts
+
 class Swerve(Subsystem):
     swerveOdometry: SwerveDrive4Odometry
     mSwerveMods: list[SwerveModule, SwerveModule, SwerveModule, SwerveModule]
@@ -95,6 +98,21 @@ class Swerve(Subsystem):
     def resetModulesToAbsolute(self):
         for mod in self.mSwerveMods:
             mod.resetToAbsolute()
+
+    def driveMotorsVoltage(self, volts):
+        for mod in self.mSwerveMods:
+            mod.driveMotorVoltage(volts)
+
+    def logDriveMotors(self, routineLog: SysIdRoutineLog):
+        for mod in self.mSwerveMods:
+            moduleName = "Module " + str(mod.moduleNumber)
+            routineLog.motor(moduleName)\
+                .voltage(mod.mDriveMotor.get_motor_voltage().value_as_double)\
+                .position(mod.getPosition().distance)\
+                .velocity(mod.getState().speed)
+            
+    def stop(self):
+        self.drive(Translation2d(), 0, False, True)
 
     def periodic(self):
         self.swerveOdometry.update(self.getGyroYaw(), tuple(self.getModulePositions()))

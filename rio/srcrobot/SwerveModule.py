@@ -1,4 +1,4 @@
-from phoenix6.controls import DutyCycleOut, PositionVoltage, VelocityVoltage
+from phoenix6.controls import DutyCycleOut, PositionVoltage, VelocityVoltage, VoltageOut
 from phoenix6.hardware import CANcoder, TalonFX
 
 from wpimath.controller import SimpleMotorFeedforwardMeters
@@ -59,6 +59,9 @@ class SwerveModule:
             self.driveVelocity.feed_forward = self.driveFeedForward.calculate(desiredState.speed)
             self.mDriveMotor.set_control(self.driveVelocity)
 
+    def driveMotorVoltage(self, volts):
+        self.mDriveMotor.set_control(VoltageOut(volts, enable_foc=False))
+
     def getCANcoder(self):
         return Rotation2d(rotationsToRadians(self.angleEncoder.get_absolute_position().value_as_double))
 
@@ -77,7 +80,7 @@ class SwerveModule:
             Conversions.rotationsToMeters(self.mDriveMotor.get_position().value_as_double, Constants.Swerve.wheelCircumference),
             Rotation2d(rotationsToRadians(self.mAngleMotor.get_position().value_as_double))
         )
-    
+
 
 
 
