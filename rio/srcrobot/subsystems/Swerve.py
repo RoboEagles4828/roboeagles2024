@@ -39,7 +39,7 @@ class Swerve(Subsystem):
             SwerveModule(3, Constants.Swerve.Mod3.constants)
         ]
 
-        self.swerveOdometry = SwerveDrive4Odometry(Constants.Swerve.swerveKinematics, self.getGyroYaw(), self.getModulePositions())
+        self.swerveOdometry = SwerveDrive4Odometry(Constants.Swerve.swerveKinematics, -self.getGyroYaw(), self.getModulePositions())
 
         AutoBuilder.configureHolonomic(
             self.getPose,
@@ -73,7 +73,7 @@ class Swerve(Subsystem):
                 discreteSpeeds.vx, 
                 discreteSpeeds.vy, 
                 discreteSpeeds.omega, 
-                self.getHeading()
+                self.getGyroYaw()
             )
         ) if fieldRelative else Constants.Swerve.swerveKinematics.toSwerveModuleStates(
             ChassisSpeeds(translation.X(), translation.Y(), rotation)
@@ -115,16 +115,19 @@ class Swerve(Subsystem):
         return self.swerveOdometry.getPose()
 
     def setPose(self, pose):
-        self.swerveOdometry.resetPosition(self.getGyroYaw(), tuple(self.getModulePositions()), pose)
+        self.swerveOdometry.resetPosition(-self.getGyroYaw(), tuple(self.getModulePositions()), pose)
 
     def getHeading(self):
         return self.getPose().rotation()
 
     def setHeading(self, heading):
-        self.swerveOdometry.resetPosition(self.getGyroYaw(), tuple(self.getModulePositions()), Pose2d(self.getPose().translation(), heading))
+        self.swerveOdometry.resetPosition(-self.getGyroYaw(), tuple(self.getModulePositions()), Pose2d(self.getPose().translation(), heading))
 
     def zeroHeading(self):
-        self.swerveOdometry.resetPosition(self.getGyroYaw(), tuple(self.getModulePositions()), Pose2d(self.getPose().translation(), Rotation2d()))
+        self.swerveOdometry.resetPosition(-self.getGyroYaw(), tuple(self.getModulePositions()), Pose2d(self.getPose().translation(), Rotation2d()))
+
+    def zeroYaw(self):
+        self.gyro.zeroYaw()
 
     def getGyroYaw(self):
         return Rotation2d.fromDegrees(self.gyro.getYaw()).__mul__(-1)
@@ -132,6 +135,10 @@ class Swerve(Subsystem):
     def resetModulesToAbsolute(self):
         for mod in self.mSwerveMods:
             mod.resetToAbsolute()
+
+    def resetModuleZero(self):
+        for mod in self.mSwerveMods:
+            mod.setDesiredStateNoOptimize(SwerveModuleState(0, Rotation2d(0)), False)
 
     def getRobotRelativeSpeeds(self):
         return Constants.Swerve.swerveKinematics.toChassisSpeeds(tuple(self.getModuleStates()))
@@ -152,7 +159,4 @@ class Swerve(Subsystem):
         self.drive(Translation2d(), 0, False, True)
 
     def periodic(self):
-        self.swerveOdometry.update(self.getGyroYaw(), tuple(self.getModulePositions()))
-
-        for mod in self.mSwerveMods:
-            print(f"{mod.moduleNumber}: {mod.getCANcoder().radians()}")
+        self.swerveOdometry.update(-self.getGyroYaw(), tuple(self.getModulePositions()))

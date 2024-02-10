@@ -42,11 +42,19 @@ class SwerveModule:
         self.resetToAbsolute()
 
         self.mDriveMotor = TalonFX(moduleConstants.driveMotorID)
-        self.mDriveMotor.configurator.apply(self.ctreConfigs.swerveDriveFXConfig)
+        if moduleNumber == 1:
+            self.mDriveMotor.configurator.apply(self.ctreConfigs.swerveDriveFXConfigFR)
+        else:
+            self.mDriveMotor.configurator.apply(self.ctreConfigs.swerveDriveFXConfig)
         self.mDriveMotor.configurator.set_position(0.0)
 
     def setDesiredState(self, desiredState: SwerveModuleState, isOpenLoop: bool):
         desiredState = SwerveModuleState.optimize(desiredState, self.getState().angle)
+        self.mAngleMotor.set_control(self.anglePosition.with_position(radiansToRotations(desiredState.angle.radians())))
+        self.setSpeed(desiredState, isOpenLoop)
+
+    def setDesiredStateNoOptimize(self, desiredState: SwerveModuleState, isOpenLoop: bool):
+        # desiredState = SwerveModuleState.optimize(desiredState, self.getState().angle)
         self.mAngleMotor.set_control(self.anglePosition.with_position(radiansToRotations(desiredState.angle.radians())))
         self.setSpeed(desiredState, isOpenLoop)
 

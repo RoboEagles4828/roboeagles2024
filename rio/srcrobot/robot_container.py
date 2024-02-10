@@ -6,17 +6,21 @@ from commands2 import InstantCommand, ConditionalCommand
 from commands2.button import JoystickButton
 from CTREConfigs import CTREConfigs
 
+from wpimath.geometry import Rotation2d
+
 
 from autos.exampleAuto import exampleAuto
 from commands.TeleopSwerve import TeleopSwerve
 from subsystems.Swerve import Swerve
+from commands.TurnInPlace import TurnInPlace
 
 from commands.SysId import DriveSysId
 
 from wpilib.shuffleboard import Shuffleboard, BuiltInWidgets, BuiltInLayouts
 from wpilib import SendableChooser
 
-from pathplannerlib.auto import PathPlannerAuto
+from autos.PathPlannerAutoRunner import PathPlannerAutoRunner
+from pathplannerlib.auto import NamedCommands
 
 class RobotContainer:
     ctreConfigs = CTREConfigs()
@@ -55,11 +59,24 @@ class RobotContainer:
             )
         )
 
+        NamedCommands.registerCommand("FaceForward", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(180))))
+        NamedCommands.registerCommand("FaceBackward", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(0))))
+        NamedCommands.registerCommand("FaceLeft", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(90))))
+        NamedCommands.registerCommand("FaceRight", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(-90))))
+
         self.auton = Shuffleboard.getTab("Auton")
         self.teleop = Shuffleboard.getTab("Teleop")
 
+        self.faceForward = JoystickButton(self.driver, XboxController.Button.kY)
+        self.faceBack = JoystickButton(self.driver, XboxController.Button.kA)
+        self.faceRight = JoystickButton(self.driver, XboxController.Button.kB)
+        self.faceLeft = JoystickButton(self.driver, XboxController.Button.kX)
+
+        self.resetToAbsoluteButton = JoystickButton(self.driver, XboxController.Button.kRightBumper)
+
         self.auton_selector = SendableChooser()
-        self.auton_selector.setDefaultOption("Test Auto", PathPlannerAuto("TestAuto"))
+        self.auton_selector.setDefaultOption("Test Auto", PathPlannerAutoRunner("TestAuto", self.s_Swerve).getCommand())
+        self.auton_selector.addOption("Example Auto", exampleAuto(self.s_Swerve).getCommand())
 
         self.auton.add("Auton Selector", self.auton_selector)\
             .withWidget(BuiltInWidgets.kComboBoxChooser)\
@@ -99,11 +116,14 @@ class RobotContainer:
     """
     def configureButtonBindings(self):
         # Driver Buttons
-        self.zeroGyro.onTrue(InstantCommand(lambda: self.s_Swerve.zeroHeading()))
+        self.zeroGyro.onTrue(InstantCommand(lambda: self.s_Swerve.zeroYaw()))
         self.robotCentric.onTrue(InstantCommand(lambda: self.toggleFieldOriented()))
 
-        #TODO: Uncomment for sysid
-        # self.sysId.whileTrue(self.driveSysId.getCommand())
+        self.faceForward.whileTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(180))))
+        self.faceBack.whileTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(0))))
+        self.faceLeft.whileTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(90))))
+        self.faceRight.whileTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(-90))))
+
 
 
     def toggleFieldOriented(self):

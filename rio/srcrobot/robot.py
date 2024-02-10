@@ -36,7 +36,6 @@ class Robot(TimedRobot):
     pass
 
   def autonomousInit(self):
-    Shuffleboard.selectTab("Auton")
     m_autonomousCommand: Command = self.m_robotContainer.getAutonomousCommand()
 
     # schedule the autonomous command (example)
@@ -47,7 +46,6 @@ class Robot(TimedRobot):
     pass
 
   def teleopInit(self):
-    Shuffleboard.selectTab("Teleop")
     # This makes sure that the autonomous stops running when
     # teleop starts running. If you want the autonomous to
     # continue until interrupted by another command, remove

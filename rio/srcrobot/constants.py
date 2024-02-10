@@ -4,7 +4,7 @@ from phoenix6.signals import SensorDirectionValue
 from wpimath.geometry import Rotation2d
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath.trajectory import TrapezoidProfile
+from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
 import lib.mathlib.units as Units
 from lib.util.COTSTalonFXSwerveConstants import COTSTalonFXSwerveConstants
 from lib.util.SwerveModuleConstants import SwerveModuleConstants
@@ -75,14 +75,14 @@ class Constants:
         angleKD = chosenModule.angleKD
 
         # Drive Motor PID Values
-        driveKP = 0.1
+        driveKP = 2.5
         driveKI = 0.0
         driveKD = 0.0
         driveKF = 0.0
 
-        driveKS = 0.12
-        driveKV = 0.24
-        driveKA = 0.1
+        driveKS = 0.2
+        driveKV = 0.28
+        driveKA = 0.0
 
         # Swerve Profiling Values
         # Meters per Second
@@ -96,8 +96,8 @@ class Constants:
         driveNeutralMode = NeutralModeValue.BRAKE
 
         holonomicPathConfig = HolonomicPathFollowerConfig(
-            PIDConstants(4.0, 0.0, 0.0),
-            PIDConstants(4.0, 0.0, 0.0),
+            PIDConstants(10.0, 0.0, 0.0),
+            PIDConstants(10.0, 0.0, 0.0),
             maxAutoModuleSpeed,
             #distance from center to the furthest module
             robotCenterLocation.distance(backLeftLocation),
@@ -118,7 +118,7 @@ class Constants:
             driveMotorID = 6
             angleMotorID = 4
             canCoderID = 5
-            angleOffset = Rotation2d(-0.763922+math.pi)
+            angleOffset = Rotation2d(-0.763922)
             constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         
         # Back Left Module - Module 2
@@ -148,7 +148,7 @@ class Constants:
         kPYController = 4.0
         kPThetaController = 1.5
     
-        kThetaControllerConstraints = TrapezoidProfile.Constraints(
+        kThetaControllerConstraints = TrapezoidProfileRadians.Constraints(
             kMaxAngularSpeedRadiansPerSecond, 
             kMaxAngularSpeedRadiansPerSecondSquared
         )

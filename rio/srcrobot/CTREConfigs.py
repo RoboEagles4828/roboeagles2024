@@ -2,8 +2,11 @@ from phoenix6.configs import CANcoderConfiguration
 from phoenix6.configs import TalonFXConfiguration
 
 from phoenix6.signals.spn_enums import AbsoluteSensorRangeValue
+from phoenix6.signals import InvertedValue
 
 from constants import Constants
+
+from copy import deepcopy
 
 from wpimath.units import radiansToRotations
 
@@ -19,11 +22,6 @@ class CTREConfigs:
 
         # for config in self.swerveCANcoderConfigList:
         self.swerveCANcoderConfig.magnet_sensor.sensor_direction = Constants.Swerve.cancoderInvert
-        
-        # self.swerveCANcoderConfigList[0].magnet_sensor.magnet_offset = radiansToRotations(Constants.Swerve.Mod0.angleOffset.radians())
-        # self.swerveCANcoderConfigList[1].magnet_sensor.magnet_offset = radiansToRotations(Constants.Swerve.Mod1.angleOffset.radians())
-        # self.swerveCANcoderConfigList[2].magnet_sensor.magnet_offset = radiansToRotations(Constants.Swerve.Mod2.angleOffset.radians())
-        # self.swerveCANcoderConfigList[3].magnet_sensor.magnet_offset = radiansToRotations(Constants.Swerve.Mod3.angleOffset.radians())
 
         #Swerve Angle Motor Configurations
         # Motor Inverts and Neutral Mode
@@ -70,3 +68,6 @@ class CTREConfigs:
 
         self.swerveDriveFXConfig.closed_loop_ramps.duty_cycle_closed_loop_ramp_period = Constants.Swerve.closedLoopRamp
         self.swerveDriveFXConfig.closed_loop_ramps.voltage_closed_loop_ramp_period = Constants.Swerve.closedLoopRamp
+
+        self.swerveDriveFXConfigFR = deepcopy(self.swerveDriveFXConfig)
+        self.swerveDriveFXConfigFR.motor_output.inverted = InvertedValue.CLOCKWISE_POSITIVE

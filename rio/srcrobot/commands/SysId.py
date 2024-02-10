@@ -24,29 +24,45 @@ class DriveSysId():
         self.dynamicForward = self.routine.dynamic(SysIdRoutine.Direction.kForward)
         self.dynamicReverse = self.routine.dynamic(SysIdRoutine.Direction.kReverse)
 
-        self.stop = InstantCommand(lambda: (s_Swerve.stop()), s_Swerve)
-        self.waitTwoSeconds = WaitCommand(2)
-
         self.resetAngleMotors = InstantCommand(lambda: (s_Swerve.resetModulesToAbsolute()), s_Swerve)
 
-    def getCommand(self):
-        return SequentialCommandGroup(
+        self.generalCommand = SequentialCommandGroup(
             self.resetAngleMotors,
-            self.stop,
-
-            self.quasiStaticForward,
-            self.stop,
-            self.waitTwoSeconds,
-
-            self.quasiStaticReverse,
-            self.stop,
-            self.waitTwoSeconds,
-
-            self.dynamicForward,
-            self.stop,
-            self.waitTwoSeconds,
-
-            self.dynamicReverse,
-            self.stop,
-            self.waitTwoSeconds
+            InstantCommand(lambda: (s_Swerve.stop()), s_Swerve),
         )
+
+        self.quasiForwardCommand =  SequentialCommandGroup(
+            self.quasiStaticForward,
+            InstantCommand(lambda: (s_Swerve.stop()), s_Swerve),
+            WaitCommand(2),
+        )
+
+        self.quasiReverseCommand = SequentialCommandGroup(
+            self.quasiStaticReverse,
+            InstantCommand(lambda: (s_Swerve.stop()), s_Swerve),
+            WaitCommand(2),
+        )
+
+        self.dynamicForwardCommand =  SequentialCommandGroup(
+            self.dynamicForward,
+            InstantCommand(lambda: (s_Swerve.stop()), s_Swerve),
+            WaitCommand(2),
+        )
+
+        self.dynamicReverseCommand = SequentialCommandGroup(
+            self.dynamicReverse,
+            InstantCommand(lambda: (s_Swerve.stop()), s_Swerve),
+            WaitCommand(2),
+        )
+
+    def getQuasiForwardCommand(self):
+        return self.quasiForwardCommand
+
+    def getQuasiReverseCommand(self):
+        return self.quasiReverseCommand
+    
+    def getDynamicForwardCommand(self):
+        return self.dynamicForwardCommand
+    
+    def getDynamicReverseCommand(self):
+        return self.dynamicReverseCommand

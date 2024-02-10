@@ -1,6 +1,12 @@
 {
   "version": 1.0,
-  "startingPose": null,
+  "startingPose": {
+    "position": {
+      "x": 0.0,
+      "y": 2.0
+    },
+    "rotation": 0
+  },
   "command": {
     "type": "sequential",
     "data": {
@@ -9,6 +15,12 @@
           "type": "path",
           "data": {
             "pathName": "TestPath"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "FaceBackward"
           }
         }
       ]
