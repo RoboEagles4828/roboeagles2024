@@ -5,15 +5,25 @@ from phoenix6.signals.spn_enums import AbsoluteSensorRangeValue
 
 from constants import Constants
 
+from wpimath.units import radiansToRotations
+
 class CTREConfigs:
     swerveAngleFXConfig = TalonFXConfiguration()
     swerveDriveFXConfig = TalonFXConfiguration()
     swerveCANcoderConfig = CANcoderConfiguration()
 
+    # swerveCANcoderConfigList = [CANcoderConfiguration(), CANcoderConfiguration(), CANcoderConfiguration(), CANcoderConfiguration()]
+
     def __init__(self):
         # Swerve CANCoder Configuration
+
+        # for config in self.swerveCANcoderConfigList:
         self.swerveCANcoderConfig.magnet_sensor.sensor_direction = Constants.Swerve.cancoderInvert
-        self.swerveCANcoderConfig.magnet_sensor.absolute_sensor_range = AbsoluteSensorRangeValue.UNSIGNED_0_TO1
+        
+        # self.swerveCANcoderConfigList[0].magnet_sensor.magnet_offset = radiansToRotations(Constants.Swerve.Mod0.angleOffset.radians())
+        # self.swerveCANcoderConfigList[1].magnet_sensor.magnet_offset = radiansToRotations(Constants.Swerve.Mod1.angleOffset.radians())
+        # self.swerveCANcoderConfigList[2].magnet_sensor.magnet_offset = radiansToRotations(Constants.Swerve.Mod2.angleOffset.radians())
+        # self.swerveCANcoderConfigList[3].magnet_sensor.magnet_offset = radiansToRotations(Constants.Swerve.Mod3.angleOffset.radians())
 
         #Swerve Angle Motor Configurations
         # Motor Inverts and Neutral Mode

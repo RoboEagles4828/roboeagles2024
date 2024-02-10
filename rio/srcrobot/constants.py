@@ -38,10 +38,10 @@ class Constants:
 
         # Swerve Kinematics 
         swerveKinematics = SwerveDrive4Kinematics(
-            frontLeftLocation, 
+            backRightLocation,
             frontRightLocation, 
             backLeftLocation, 
-            backRightLocation
+            frontLeftLocation
         )
 
         # Module Gear Ratios
@@ -66,7 +66,7 @@ class Constants:
         driveCurrentThresholdTime = 0.1
         driveEnableCurrentLimit = True
 
-        openLoopRamp = 0.25
+        openLoopRamp = 0.0
         closedLoopRamp = 0.0
 
         # Angle Motor PID Values
@@ -110,7 +110,7 @@ class Constants:
             driveMotorID = 3
             angleMotorID = 1
             canCoderID = 2
-            angleOffset = Rotation2d(6.0116)
+            angleOffset = Rotation2d(2.8025+math.pi)
             constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
 
         # Front Right Module - Module 1
@@ -118,7 +118,7 @@ class Constants:
             driveMotorID = 6
             angleMotorID = 4
             canCoderID = 5
-            angleOffset = Rotation2d(2.3686)
+            angleOffset = Rotation2d(-0.763922+math.pi)
             constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         
         # Back Left Module - Module 2
@@ -126,7 +126,7 @@ class Constants:
             driveMotorID = 12
             angleMotorID = 10
             canCoderID = 11
-            angleOffset = Rotation2d(2.9038)
+            angleOffset = Rotation2d(-0.30526+math.pi)
             constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
 
         # Back Right Module - Module 3
@@ -134,7 +134,7 @@ class Constants:
             driveMotorID = 9
             angleMotorID = 7
             canCoderID = 8
-            angleOffset = Rotation2d(0.1349)
+            angleOffset = Rotation2d(0.107378)
             constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
 
     class AutoConstants:

@@ -9,7 +9,7 @@ from lib.util.SwerveModuleConstants import SwerveModuleConstants
 from constants import Constants
 from CTREConfigs import CTREConfigs
 from phoenix6.configs import CANcoderConfiguration
-from phoenix6.configs import TalonFXConfiguration
+from phoenix6.configs import TalonFXConfiguration 
 
 from wpimath.units import radiansToRotations, rotationsToRadians
 
@@ -67,7 +67,7 @@ class SwerveModule:
 
     def resetToAbsolute(self):
         absolutePosition = self.getCANcoder().radians() - self.angleOffset.radians()
-        self.mAngleMotor.set_position(absolutePosition)
+        self.mAngleMotor.set_position(radiansToRotations(absolutePosition))
 
     def getState(self):
         return SwerveModuleState(

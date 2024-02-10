@@ -50,7 +50,7 @@ class RobotContainer:
                 self.s_Swerve, 
                 lambda: -self.driver.getRawAxis(self.translationAxis), 
                 lambda: -self.driver.getRawAxis(self.strafeAxis), 
-                lambda: -self.driver.getRawAxis(self.rotationAxis), 
+                lambda: self.driver.getRawAxis(self.rotationAxis), 
                 lambda: self.robotCentric_value
             )
         )

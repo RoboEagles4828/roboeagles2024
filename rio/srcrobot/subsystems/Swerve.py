@@ -67,11 +67,12 @@ class Swerve(Subsystem):
             Shuffleboard.update()
 
     def drive(self, translation: Translation2d, rotation, fieldRelative, isOpenLoop):
+        discreteSpeeds = ChassisSpeeds.discretize(translation.X(), translation.Y(), rotation, 0.02)
         swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
             ChassisSpeeds.fromFieldRelativeSpeeds(
-                translation.X(), 
-                translation.Y(), 
-                rotation, 
+                discreteSpeeds.vx, 
+                discreteSpeeds.vy, 
+                discreteSpeeds.omega, 
                 self.getHeading()
             )
         ) if fieldRelative else Constants.Swerve.swerveKinematics.toSwerveModuleStates(
@@ -152,3 +153,6 @@ class Swerve(Subsystem):
 
     def periodic(self):
         self.swerveOdometry.update(self.getGyroYaw(), tuple(self.getModulePositions()))
+
+        for mod in self.mSwerveMods:
+            print(f"{mod.moduleNumber}: {mod.getCANcoder().radians()}")

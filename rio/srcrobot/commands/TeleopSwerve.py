@@ -27,9 +27,9 @@ class TeleopSwerve(Command):
 
     def execute(self):
         # Get Values, Deadband
-        translationVal = applyDeadband(self.translationSup(), Constants.stickDeadband)
-        strafeVal = applyDeadband(self.strafeSup(), Constants.stickDeadband)
-        rotationVal = applyDeadband(self.rotationSup(), Constants.stickDeadband)
+        translationVal = applyDeadband(self.translationSup(), Constants.stickDeadband)**3
+        strafeVal = applyDeadband(self.strafeSup(), Constants.stickDeadband)**3
+        rotationVal = applyDeadband(self.rotationSup(), Constants.stickDeadband)**3
 
         # Drive
         self.s_Swerve.drive(
