@@ -5,14 +5,14 @@ FROM ${IMAGE_NAME}
 
 
 # Install the Isaac ROS April Tag
-RUN mkdir -p /root/${ISAAC_ROS_WS}/src
-WORKDIR /root/${ISAAC_ROS_WS}/src
+RUN mkdir -p /root/isaac_ros_ws/src
+WORKDIR /root/isaac_ros_ws/src
 RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common.git
 RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag.git
 RUN git clone -b ros2 https://github.com/ros-drivers/usb_cam
-RUN sudo apt-get install -y ros-humble-isaac-ros-apriltag
+RUN source /opt/ros/humble/setup.bash
+RUN rosdep install --from-paths ./ --ignore-src -r -y
 RUN colcon build --symlink-install
-RUN sourcw /root/${ISAAC_ROS_WS}/install/setup.bash
 
 
 

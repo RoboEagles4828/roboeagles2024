@@ -1,17 +1,5 @@
 #!/bin/bash
-# set -e
+source /opt/ros/${ROS_DISTRO}/setup.bash
+source install/setup.bash
 
-# # setup ros2 environment
-# source "/opt/ros/$ROS_DISTRO/install/setup.bash" --
-# source "/root/ros2_ws/install/local_setup.bash" --
-
-# # Welcome information
-# echo "ZED ROS2 Docker Image"
-# echo "---------------------"
-# echo 'ROS distro: ' $ROS_DISTRO
-# echo 'DDS middleware: ' $RMW_IMPLEMENTATION 
-# echo "---"  
-# echo 'Available ZED packages:'
-# ros2 pkg list | grep zed
-# echo "---------------------"    
-# exec "$@"
+ros2 launch isaac_ros_apriltag isaac_ros_apriltag_usb_cam.launch.py
