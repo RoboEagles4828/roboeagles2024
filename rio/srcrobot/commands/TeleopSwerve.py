@@ -29,12 +29,15 @@ class TeleopSwerve(Command):
         # Get Values, Deadband
         translationVal = applyDeadband(self.translationSup(), Constants.stickDeadband)**3
         strafeVal = applyDeadband(self.strafeSup(), Constants.stickDeadband)**3
-        rotationVal = applyDeadband(self.rotationSup(), Constants.stickDeadband)**3
+        rotationVal = self.getRotationValue()
 
         # Drive
         self.s_Swerve.drive(
             Translation2d(translationVal, strafeVal).__mul__(Constants.Swerve.maxSpeed), 
-            rotationVal * Constants.Swerve.maxAngularVelocity, 
+            rotationVal, 
             not self.robotCentricSup(), 
             True
         )
+
+    def getRotationValue(self):
+        return (applyDeadband(self.rotationSup(), Constants.stickDeadband)**3) * Constants.Swerve.maxAngularVelocity

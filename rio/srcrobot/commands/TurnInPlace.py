@@ -1,29 +1,30 @@
 from commands2 import Command
 from constants import Constants
-from wpimath.controller import ProfiledPIDControllerRadians
+from wpimath.controller import ProfiledPIDControllerRadians, PIDController
 from subsystems.Swerve import Swerve
+from commands.TeleopSwerve import TeleopSwerve
 from wpimath.geometry import Translation2d, Rotation2d
+from wpimath.trajectory import TrapezoidProfile
 import math
 
-class TurnInPlace(Command):
-    def __init__(self, s_Swerve, desiredRotationSup):
-        self.addRequirements(s_Swerve)
+class TurnInPlace(TeleopSwerve):
+    def __init__(self, s_Swerve, desiredRotationSup, translationSup, strafeSup, rotationSup, robotCentricSup):
+        super().__init__(s_Swerve, translationSup, strafeSup, rotationSup, robotCentricSup)
+        self.turnPID = PIDController(4.0, 0.0, 0.0)
+        self.turnPID.enableContinuousInput(-math.pi, math.pi)
+        self.angle = desiredRotationSup().radians()
+        self.turnPID.setTolerance(math.radians(1))
 
-        self.controller = ProfiledPIDControllerRadians(0.1, 0.0, 0.0, Constants.AutoConstants.kThetaControllerConstraints)
-        self.s_Swerve: Swerve = s_Swerve
-        
-        self.desiredRotationSup = desiredRotationSup
 
     def initialize(self):
-        self.controller.setGoal(self.desiredRotationSup().radians())
-        self.controller.setTolerance(math.radians(1))
+        super().initialize()
+        self.start_angle = self.s_Swerve.getGyroYaw().radians()
+        self.turnPID.reset()
+        self.turnPID.setSetpoint(self.angle)
 
-    def execute(self):
-        value = self.controller.calculate(-self.s_Swerve.gyro.getYaw())
-        self.s_Swerve.drive(Translation2d(0, 0), math.radians(value), False, False)
-
-    def end(self, interrupted: bool):
-        self.s_Swerve.drive(Translation2d(0, 0), 0.0, False, False)
+    def getRotationValue(self):
+        self.angularvelMRadiansPerSecond = self.turnPID.calculate(-self.s_Swerve.getGyroYaw().radians())
+        return self.angularvelMRadiansPerSecond
 
     def isFinished(self) -> bool:
-        return self.controller.atGoal()
+        return self.turnPID.atSetpoint()
