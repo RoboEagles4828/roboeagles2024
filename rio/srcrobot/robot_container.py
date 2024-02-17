@@ -48,21 +48,15 @@ class RobotContainer:
 
     # The container for the robot. Contains subsystems, OI devices, and commands.
     def __init__(self):
+        translation = lambda: 0.0
+        strafe = lambda: 0.0
+        rotation = lambda: 0.0
+        robotcentric = lambda: False
 
-        self.s_Swerve.setDefaultCommand(
-            TeleopSwerve(
-                self.s_Swerve, 
-                lambda: -self.driver.getRawAxis(self.translationAxis), 
-                lambda: -self.driver.getRawAxis(self.strafeAxis), 
-                lambda: self.driver.getRawAxis(self.rotationAxis), 
-                lambda: self.robotCentric_value
-            )
-        )
-
-        NamedCommands.registerCommand("FaceForward", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(180))))
-        NamedCommands.registerCommand("FaceBackward", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(0))))
-        NamedCommands.registerCommand("FaceLeft", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(90))))
-        NamedCommands.registerCommand("FaceRight", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(-90))))
+        NamedCommands.registerCommand("FaceForward", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(180)), translation, strafe, rotation, robotcentric))
+        NamedCommands.registerCommand("FaceBackward", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(0)), translation, strafe, rotation, robotcentric))
+        NamedCommands.registerCommand("FaceLeft", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(90)), translation, strafe, rotation, robotcentric))
+        NamedCommands.registerCommand("FaceRight", TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(-90)), translation, strafe, rotation, robotcentric))
 
         self.auton = Shuffleboard.getTab("Auton")
         self.teleop = Shuffleboard.getTab("Teleop")
@@ -73,6 +67,8 @@ class RobotContainer:
         self.faceLeft = JoystickButton(self.driver, XboxController.Button.kX)
 
         self.resetToAbsoluteButton = JoystickButton(self.driver, XboxController.Button.kRightBumper)
+
+        self.configureButtonBindings()
 
         self.auton_selector = SendableChooser()
         self.auton_selector.setDefaultOption("Test Auto", PathPlannerAutoRunner("TestAuto", self.s_Swerve).getCommand())
@@ -105,9 +101,6 @@ class RobotContainer:
         
         Shuffleboard.update()
 
-        # Configure the button bindings
-        self.configureButtonBindings()
-
     """
      * Use this method to define your button->command mappings. Buttons can be created by
      * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -115,14 +108,29 @@ class RobotContainer:
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
     """
     def configureButtonBindings(self):
+        translation = lambda: -self.driver.getRawAxis(self.translationAxis) 
+        strafe = lambda: -self.driver.getRawAxis(self.strafeAxis)
+        rotation = lambda: self.driver.getRawAxis(self.rotationAxis)
+        robotcentric = lambda: self.robotCentric_value
+
+        self.s_Swerve.setDefaultCommand(
+            TeleopSwerve(
+                self.s_Swerve, 
+                translation,
+                strafe,
+                rotation,
+                robotcentric
+            )
+        )
+
         # Driver Buttons
         self.zeroGyro.onTrue(InstantCommand(lambda: self.s_Swerve.zeroYaw()))
-        self.robotCentric.onTrue(InstantCommand(lambda: self.toggleFieldOriented()))
+        self.robotCentric.onFalse(InstantCommand(lambda: self.toggleFieldOriented()))
 
-        self.faceForward.whileTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(180))))
-        self.faceBack.whileTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(0))))
-        self.faceLeft.whileTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(90))))
-        self.faceRight.whileTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(-90))))
+        self.faceForward.onTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(180)), translation, strafe, rotation, robotcentric))
+        self.faceBack.onTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(0)), translation, strafe, rotation, robotcentric))
+        self.faceLeft.onTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(90)), translation, strafe, rotation, robotcentric))
+        self.faceRight.onTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(-90)), translation, strafe, rotation, robotcentric))
 
 
 
