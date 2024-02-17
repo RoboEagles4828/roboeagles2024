@@ -3,7 +3,7 @@ from commands2.subsystem import Commands
 import wpimath.filter
 import wpimath
 import wpilib
-import phoenix5
+import phoenix6
 import math
 
 class Arm(Subsystem):
@@ -15,11 +15,10 @@ class Arm(Subsystem):
 
 
     def __init__(self):
-        self.kArmMotorCANId = 12
-
+        self.kArmMotorCANId = 5
         self.kMeasuredTicksWhenHorizontal = 0
         self.kEncoderTickPerEncoderRotation = 4096
-        self.kEncoderToArmGearRatio = 60.0 / 16.0
+        self.kEncoderToArmGearRatio = 1.0
         self.kEncoderTicksPerArmRotation = self.kEncoderTickPerEncoderRotation * self.kEncoderToArmGearRatio
         self.kEncoderTicksPerDegreeOfArmMotion = self.kEncoderTicksPerArmRotation / 360.0
         self.kMotionMagicSlot = 0
@@ -39,7 +38,7 @@ class Arm(Subsystem):
         self.ZeroingVelocityTolerance = 10.0
 
 
-        self.armMotor = phoenix5.TalonSRX(self.kArmMotorCANId)
+        self.armMotor = phoenix6.TalonSRX(self.kArmMotorCANId)
 
         # True when servo control active and false otherwise.
         self.isServoControl = False
@@ -69,10 +68,10 @@ class Arm(Subsystem):
     #     @return a command that will move the arm toward 0, and stop when stalled.
     #    
     def seekArmZero(self):
-        return self.selectPIDSlot(self.kVelocitySlot).andThen(self.armMotor.set(
-            phoenix5.ControlMode.Velocity,
+        return self.runOnce(lambda: self.selectPIDSlot(self.kVelocitySlot)).andThen(self.armMotor.set(
+            phoenix6.ControlMode.Velocity,
             self.kZeroEncoderVelocity,
-            phoenix5.DemandType.ArbitraryFeedForward,
+            phoenix6.DemandType.ArbitraryFeedForward,
             self.calculateGravityFeedForward())) \
             .raceWith(Commands \
                 .waitSeconds(self.kZeroingWaitForMoveSec)
@@ -89,8 +88,7 @@ class Arm(Subsystem):
     #    
     def detectStallAtHardStop(self):
         stallDebouncer = wpimath.filter.Debouncer(1.0, wpimath.filter.Debouncer.DebounceType.kRising)
-        return Commands.waitUntil(stallDebouncer \
-        .calculate(wpimath.MathUtil.isNear(
+        return Commands.waitUntil(lambda: stallDebouncer.calculate(wpimath.MathUtil.isNear(
             0.0,
             self.armMotor.getSelectedSensorVelocity(self.kVelocitySlot),
             self.kZeroingVelocityTolerance)))
@@ -103,11 +101,14 @@ class Arm(Subsystem):
     #     @return a command to rest at the hard stop at 0 and on target.
     #    
     def restingAtZero(self):
-        return self.runOnce(self.restingAtZero = True) \
-        .andThen(self.run(self.armMotor.set(0.0)).withTimeout(1.0)) \
-        .andThen(self.hardSetEncoderToZero) \
-        .andThen(self.run(self.armMotor.set(-0.1))) \
-        .finallyDo(self.restingAtZero = False)
+        return self.runOnce(lambda: self.setRestingAtZero(True)) \
+        .andThen(self.run(lambda: self.armMotor.set(0.0)).withTimeout(1.0)) \
+        .andThen(lambda: self.hardSetEncoderToZero()) \
+        .andThen(self.run(lambda: self.armMotor.set(-0.1))) \
+        .finallyDo(lambda: self.setRestingAtZero(False))
+    
+    def setRestingAtZero(self, restAtZero):
+        self.restingAtZero = restAtZero
 
     def hardSetEncoderToZero(self):
         self.armMotor.setSelectedSensorPosition(0)
@@ -132,15 +133,23 @@ class Arm(Subsystem):
             return self.seekArmZero()
 
         targetSensorUnits = degrees * self.kEncoderTicksPerDegreeOfArmMotion
-        return self.runOnce(self.lastServoTarget) \
-        .andThen(self.run(self.rmMotor.set(
-            phoenix5.ControlMode.MotionMagic,
+        return self.runOnce(lambda: self.initializeServoArmToTarget(degrees)) \
+        .andThen(lambda: self.run(self.armMotor.set(
+            phoenix6.ControlMode.MotionMagic,
             targetSensorUnits,
-            phoenix5.DemandType.ArbitraryFeedForward,
+            phoenix6.DemandType.ArbitraryFeedForward,
             self.calculateGravityFeedForward()))) \
-        .finallyDo(self.isServoControl = False) \
+        .finallyDo(lambda: self.setServoControl(False)) \
         .withName("servoArmToTarget: " + degrees)
   
+    def initializeServoArmToTarget(self, degrees):
+        self.lastServoTarget = degrees
+        self.setServoControl(True)
+        self.selectPIDSlot(self.kMotionMagicSlot)
+
+    def setServoControl(self, servoControl):
+        self.isServoControl = servoControl
+
 
     #      
     #     This method should rarely be used. It is for pure manual control (no encoder
@@ -150,7 +159,7 @@ class Arm(Subsystem):
     #     @return a command that drives the arm via double supplier.
     #    
     def moveArm(self, percentOutput):
-        return self.run(self.armMotor.set(percentOutput.getAsDouble() * 0.4)) \
+        return self.run(lambda: self.armMotor.set(percentOutput() * 0.4)) \
         .withName("moveArm")
   
 
@@ -165,7 +174,7 @@ class Arm(Subsystem):
         degrees = self.getDegrees()
         radians = math.toRadians(degrees)
         cosineScalar = math.cos(radians)
-        return self.kMaxGravityFF * cosineScalar
+        return self.MaxGravityFF * cosineScalar
   
     #     
     #     Assuming a properly zeroed arm (0 degrees is parallel to the ground), return
