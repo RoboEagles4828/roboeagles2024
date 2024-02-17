@@ -152,3 +152,7 @@ class Constants:
             kMaxAngularSpeedRadiansPerSecond, 
             kMaxAngularSpeedRadiansPerSecondSquared
         )
+    class ShooterConstants:
+        kSubwooferPivotAngle = 0.0
+        kPodiumPivotAngle = 45.0
+        kAmpPivotAngle = 90.0
