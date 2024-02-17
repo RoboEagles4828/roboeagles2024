@@ -16,7 +16,7 @@ class MyRobot(wpilib.TimedRobot):
         should be used for any initialization code.
         """
 
-
+        # switching to encoder position based on nic's request, not complete
         self.controller = wpilib.XboxController(0)
         self.left = phoenix5.TalonFX(14)
         self.right = phoenix5.TalonFX(13)
@@ -43,10 +43,12 @@ class MyRobot(wpilib.TimedRobot):
         """This function is called periodically during teleoperated mode."""
         self.left.set(
             phoenix5.TalonFXControlMode.PercentOutput,
+            #phoenix5.TalonFXControlMode.Position,
             wpimath.applyDeadband(-self.controller.getLeftY(), 0.1)
         )
         self.right.set(
             phoenix5.TalonFXControlMode.PercentOutput,
+            #phoenix5.TalonFXControlMode.Position,
             wpimath.applyDeadband(-self.controller.getRightY(), 0.1)
         )
         
