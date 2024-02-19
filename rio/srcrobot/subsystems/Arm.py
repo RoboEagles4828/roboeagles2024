@@ -1,9 +1,11 @@
 from commands2.subsystem import Subsystem
-from commands2.subsystem import Commands
+from commands2.subsystem import Command
+from commands2 import WaitCommand
+from commands2 import WaitUntilCommand
 import wpimath.filter
 import wpimath
 import wpilib
-import phoenix6
+import phoenix5
 import math
 
 class Arm(Subsystem):
@@ -36,9 +38,9 @@ class Arm(Subsystem):
         self.kZeroEncoderVelocity = -self.kEncoderTicksPerDegreeOfArmMotion * 5.0
         self.kZeroingWaitForMoveSec = 2.0
         self.ZeroingVelocityTolerance = 10.0
+        
 
-
-        self.armMotor = phoenix6.TalonSRX(self.kArmMotorCANId)
+        self.armMotor = phoenix5.TalonSRX(self.kArmMotorCANId)
 
         # True when servo control active and false otherwise.
         self.isServoControl = False
@@ -68,17 +70,16 @@ class Arm(Subsystem):
     #     @return a command that will move the arm toward 0, and stop when stalled.
     #    
     def seekArmZero(self):
+        
         return self.runOnce(lambda: self.selectPIDSlot(self.kVelocitySlot)).andThen(self.armMotor.set(
-            phoenix6.ControlMode.Velocity,
+            phoenix5.ControlMode.Velocity,
             self.kZeroEncoderVelocity,
-            phoenix6.DemandType.ArbitraryFeedForward,
+            phoenix5.DemandType.ArbitraryFeedForward,
             self.calculateGravityFeedForward())) \
-            .raceWith(Commands \
-                .waitSeconds(self.kZeroingWaitForMoveSec)
-                .andThen(self.detectStallAtHardStop())) \
-        .andThen(self.restingAtZero()) \
-        .withName("seekArmZero")
-
+            .raceWith(WaitCommand(self.kZeroingWaitForMoveSec) \
+            .andThen(self.detectStallAtHardStop())) \
+            .andThen(self.restingAtZero()) \
+            .withName("seekArmZero")
 
     #     
     #     Creates a command to detect stall at the hard stop during
@@ -87,11 +88,8 @@ class Arm(Subsystem):
     #     @return the hard stop detection command.
     #    
     def detectStallAtHardStop(self):
-        stallDebouncer = wpimath.filter.Debouncer(1.0, wpimath.filter.Debouncer.DebounceType.kRising)
-        return Commands.waitUntil(lambda: stallDebouncer.calculate(wpimath.MathUtil.isNear(
-            0.0,
-            self.armMotor.getSelectedSensorVelocity(self.kVelocitySlot),
-            self.kZeroingVelocityTolerance)))
+        stallDebouncer = wpimath.filter.Debouncer(1.0, wpimath.filter.Debouncer.DebounceType.kRising)  
+        return WaitUntilCommand(lambda: abs(self.armMotor.getSelectedSensorVelocity(self.kVelocitySlot) - 0.0) < self.ZeroingVelocityTolerance)
         
 
     #     
@@ -135,9 +133,9 @@ class Arm(Subsystem):
         targetSensorUnits = degrees * self.kEncoderTicksPerDegreeOfArmMotion
         return self.runOnce(lambda: self.initializeServoArmToTarget(degrees)) \
         .andThen(lambda: self.run(self.armMotor.set(
-            phoenix6.ControlMode.MotionMagic,
+            phoenix5.ControlMode.MotionMagic,
             targetSensorUnits,
-            phoenix6.DemandType.ArbitraryFeedForward,
+            phoenix5.DemandType.ArbitraryFeedForward,
             self.calculateGravityFeedForward()))) \
         .finallyDo(lambda: self.setServoControl(False)) \
         .withName("servoArmToTarget: " + degrees)
@@ -172,7 +170,7 @@ class Arm(Subsystem):
     #    
     def calculateGravityFeedForward(self):
         degrees = self.getDegrees()
-        radians = math.toRadians(degrees)
+        radians = degrees * (math.pi/180.0)
         cosineScalar = math.cos(radians)
         return self.MaxGravityFF * cosineScalar
   
@@ -196,7 +194,7 @@ class Arm(Subsystem):
     def isServoOnTarget(self):
         return self.restingAtZero \
             or (self.isServoControl \
-                and math.MathUtil.isNear(self.lastServoTarget, self.getDegrees(), self.kServoToleranceDegrees))
+                and abs(self.lastServoTarget - self.getDegrees()) > self.kServoToleranceDegrees)
 
 
 
