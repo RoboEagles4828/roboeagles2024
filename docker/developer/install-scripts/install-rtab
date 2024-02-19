@@ -16,7 +16,7 @@ sudo apt-get update -y && rosdep update --rosdistro=humble
 echo -e "\e[93mInstalling RTAB\e[0m"
 
 # Install rtab binraies and dependencies
-sudo apt-get install -y ros-humble-rtabmap ros-humble-rtabmap-ros
+sudo apt-get install -y ros-humble-rtabmap
 
 # source /opt/ros/humble/setup.bash
 # cd ~/workspaces/rtab_ws && \

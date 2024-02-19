@@ -27,7 +27,7 @@ apply() {
         -v $HOME/roboeagles2024:/opt/workspace:rw \
         --user admin \
         --entrypoint /opt/workspace/scripts/remote-rebuild \
-        ghcr.io/roboeagles4828/jetson:3 build $packages
+        ghcr.io/roboeagles4828/jetson:4 build $packages
     if [ -f "./.rsyncmetadata" ]; then rm .rsyncmetadata; fi
 }
 

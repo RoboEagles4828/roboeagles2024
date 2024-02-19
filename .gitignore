@@ -5,6 +5,7 @@ c_cpp_properties.json
 __pycache__
 nvidia_driver_config
 docker/developer/tmp
+docker/developer/src
 view_tmp.rviz
 .devcontainer/.env
 src/edna_description/urdf/edna.urdf

@@ -6,11 +6,19 @@ FROM ${IMAGE_NAME}
 RUN mkdir -p /root/isaac_ros_ws/src
 WORKDIR /root/isaac_ros_ws/src
 
-RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag.git
+# RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag.git
 
 WORKDIR /root/isaac_ros_ws
 
-RUN apt-get update -y && rosdep update && rosdep install --from-paths src --ignore-src -r -y
+# Add apt repositories
+RUN echo 'ADDING APT REPOS'
+RUN wget -qO - https://isaac.download.nvidia.com/isaac-ros/repos.key | sudo apt-key add -
+RUN sudo apt update && sudo apt install curl -y \
+  && sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+RUN sudo apt-get update -y
+RUN sudo apt-get install ros-humble-isaac-ros-apriltag -y
+RUN rosdep update && rosdep install --from-paths src --ignore-src -r -y
 
 RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash && \
   colcon build --parallel-workers $(nproc) --symlink-install \

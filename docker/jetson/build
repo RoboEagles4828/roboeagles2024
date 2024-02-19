@@ -6,14 +6,15 @@ PREV_VERSION="$((VERSION-1))"
 GITHUB_REGISTRY="ghcr.io/roboeagles4828"
 IMAGE_NAME="jetson"
 
-# Build Image
-echo "Building image : jetson-base:$VERSION"
+echo "Building image $GITHUB_REGISTRY/$IMAGE_NAME:$VERSION from $GITHUB_REGISTRY/$IMAGE_NAME:$PREV_VERSION"
+
 cd ../developer
 
-rm -rf ./src
-cp -r ../../src .
+rm -rf ./tmp
+mkdir tmp
+cp -r ../../src ./tmp/src
 # Copy rio requirements to be installed
-touch ./src/requirements.txt
+cp -r ../../rio ./tmp/rio
 
 # Build from the Dockerfile in the developer folder making an intermediate image
 docker build -t $GITHUB_REGISTRY/$IMAGE_NAME:$VERSION \
@@ -24,7 +25,6 @@ docker build -t $GITHUB_REGISTRY/$IMAGE_NAME:$VERSION \
     --build-arg INSTALL_PYTHON_DEPS="false" .
 
 echo "Build finished"
-cd ../jetson
 
 echo "Would you like to run the image in interactive mode? (y/n)"
 read INTERACTIVE
@@ -40,4 +40,5 @@ if [ "$PUSH" = "y" ]; then
     docker push $GITHUB_REGISTRY/$IMAGE_NAME:$VERSION
 fi
 
-rm -rf ../developer/src
+rm -rf tmp
+cd ../jetson
