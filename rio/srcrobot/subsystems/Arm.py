@@ -100,10 +100,10 @@ class Arm(Subsystem):
     #    
     def restingAtZero(self):
         return self.runOnce(lambda: self.setRestingAtZero(True)) \
-        .andThen(self.run(lambda: self.armMotor.set(0.0)).withTimeout(1.0)) \
-        .andThen(lambda: self.hardSetEncoderToZero()) \
-        .andThen(self.run(lambda: self.armMotor.set(-0.1))) \
-        .finallyDo(lambda: self.setRestingAtZero(False))
+        .andThen(self.run(lambda: self.armMotor.set(phoenix5.ControlMode.Velocity,0.0)).withTimeout(1.0)) \
+        .andThen(lambda: self.hardSetEncoderToZero() ) \
+        .andThen(self.run(lambda: self.armMotor.set(phoenix5.ControlMode.Velocity,-0.1))) \
+        .finallyDo(lambda interrupted: self.setRestingAtZero(False))
     
     def setRestingAtZero(self, restAtZero):
         self.kRestingAtZero = restAtZero
