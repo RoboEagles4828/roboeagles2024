@@ -1,6 +1,7 @@
 from wpilib.interfaces import GenericHID
 from wpilib import Joystick
 from wpilib import XboxController
+from commands2.button import CommandXboxController
 from commands2 import Command, Subsystem
 from commands2 import InstantCommand, ConditionalCommand
 from commands2.button import JoystickButton
@@ -13,7 +14,8 @@ from constants import Constants
 from autos.exampleAuto import exampleAuto
 from commands.TeleopSwerve import TeleopSwerve
 from subsystems.Swerve import Swerve
-from subsystems.Arm import Arm
+from subsystems.intake import Intake
+# from subsystems.Arm import Arm
 from commands.TurnInPlace import TurnInPlace
 
 from commands.SysId import DriveSysId
@@ -31,7 +33,7 @@ class RobotContainer:
     strafeAxis = XboxController.Axis.kLeftX
     rotationAxis = XboxController.Axis.kRightX
 
-    driver = XboxController(0)
+    driver = CommandXboxController(0)
     operator = XboxController(1)
 
     sysId = JoystickButton(driver, XboxController.Button.kY)
@@ -40,7 +42,8 @@ class RobotContainer:
 
     # Subsystems
     s_Swerve : Swerve = Swerve()
-    s_Arm : Arm = Arm()
+    # s_Arm : Arm = Arm()
+    s_Intake : Intake = Intake()
 
     #SysId
     driveSysId = DriveSysId(s_Swerve)
@@ -60,34 +63,33 @@ class RobotContainer:
 
         self.auton = Shuffleboard.getTab("Auton")
         self.teleop = Shuffleboard.getTab("Teleop")
-        self.zeroGyro = JoystickButton(self.driver, XboxController.Button.kBack)
-        self.robotCentric = JoystickButton(self.driver, XboxController.Button.kStart)
-        self.faceForward = JoystickButton(self.driver, XboxController.Button.kY)
-        self.faceBack = JoystickButton(self.driver, XboxController.Button.kA)
-        self.faceRight = JoystickButton(self.driver, XboxController.Button.kB)
-        self.faceLeft = JoystickButton(self.driver, XboxController.Button.kX)
+        self.zeroGyro = self.driver.back()
+        self.robotCentric = self.driver.start()
+        self.faceForward = self.driver.y()
+        self.faceBack = self.driver.a()
+        self.faceRight = self.driver.b()
+        self.faceLeft = self.driver.x()
 
-        self.resetToAbsoluteButton = JoystickButton(self.driver, XboxController.Button.kRightBumper)
+        self.resetToAbsoluteButton = self.driver.rightBumper()
 
-        self.manualArm = JoystickButton(self.driver, XboxController.Button.kLeftBumper)
-        self.armAmp = JoystickButton(self.driver, XboxController.Button.kY)
-        self.armPodium = JoystickButton(self.driver, XboxController.Button.kB)
-        self.armSubwoofer = JoystickButton(self.driver, XboxController.Button.kA)
-        self.intakeOn = self.driver.POVRight(CommandScheduler.getInstance().getDefaultButtonLoop())
-        self.intakeOff = self.driver.POVLeft(CommandScheduler.getInstance().getDefaultButtonLoop())
+        self.manualArm = self.operator.leftBumper() 
+        # self.armAmp = self.operator.Y()
+        # self.armPodium = self.operator.B()
+        # self.armSubwoofer = self.operator.A()
+        self.intakeOn = self.driver.povRight()
+        self.intakeOff = self.driver.povLeft()
 
-        self.armHome = JoystickButton(self.operator, XboxController.Axis.kRightTrigger)
-        self.shooterOff = JoystickButton(self.operator, XboxController.Button.kRightBumper)
-        self.reverse = JoystickButton(self.operator, XboxController.Axis.kLeftTrigger)
-        self.queSubFront = JoystickButton(self.operator, XboxController.Button.kA)
-        self.quePodium = JoystickButton(self.operator, XboxController.Button.kY)
-        self.queSubRight = JoystickButton(self.operator, XboxController.Button.kB)
-        self.queSubLeft = JoystickButton(self.operator, XboxController.Button.kX)
-        self.queAmp = self.operator.POVUp(CommandScheduler.getInstance().getDefaultButtonLoop())
-        self.queClimbFront = self.operator.POVDown(CommandScheduler.getInstance().getDefaultButtonLoop())
-        self.queClimbRight = self.operator.POVRight(CommandScheduler.getInstance().getDefaultButtonLoop())
-        self.queClimbLeft = self.operator.POVLeft(CommandScheduler.getInstance().getDefaultButtonLoop())
-
+        self.armHome = self.operator.rightTrigger()
+        self.shooterOff = self.operator.rightBumper()
+        self.reverse = self.operator.leftTrigger()
+        self.queSubFront = self.operator.A()
+        self.quePodium = self.operator.Y()
+        self.queSubRight = self.operator.B()
+        self.queSubLeft = self.operator.X()
+        self.queAmp = self.operator.POVUp()
+        self.queClimbFront = self.operator.POVDown()
+        self.queClimbRight = self.operator.POVRight()
+        self.queClimbLeft = self.operator.POVLeft()
         self.configureButtonBindings()
 
         self.auton_selector = SendableChooser()
@@ -144,11 +146,11 @@ class RobotContainer:
         )
 
         # Arm Buttons
-        self.s_Arm.setDefaultCommand(self.s_Arm.seekArmZero())
-        self.manualArm.whileTrue(self.s_Arm.moveArm(lambda: self.operator.getLeftY()))
-        self.armAmp.onTrue(self.s_Arm.servoArmToTarget(Constants.ShooterConstants.kAmpPivotAngle))
-        self.armPodium.onTrue(self.s_Arm.servoArmToTarget(Constants.ShooterConstants.kPodiumPivotAngle))
-        self.armSubwoofer.onTrue(self.s_Arm.servoArmToTarget(Constants.ShooterConstants.kSubwooferPivotAngle))
+        # self.s_Arm.setDefaultCommand(self.s_Arm.seekArmZero())
+        # self.manualArm.whileTrue(self.s_Arm.moveArm(lambda: self.operator.getLeftY()))
+        # self.armAmp.onTrue(self.s_Arm.servoArmToTarget(Constants.ShooterConstants.kAmpPivotAngle))
+        # self.armPodium.onTrue(self.s_Arm.servoArmToTarget(Constants.ShooterConstants.kPodiumPivotAngle))
+        # self.armSubwoofer.onTrue(self.s_Arm.servoArmToTarget(Constants.ShooterConstants.kSubwooferPivotAngle))
         # Driver Buttons
         self.zeroGyro.onTrue(InstantCommand(lambda: self.s_Swerve.zeroYaw()))
         self.robotCentric.onFalse(InstantCommand(lambda: self.toggleFieldOriented()))
@@ -157,6 +159,10 @@ class RobotContainer:
         self.faceBack.onTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(0)), translation, strafe, rotation, robotcentric))
         self.faceLeft.onTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(90)), translation, strafe, rotation, robotcentric))
         self.faceRight.onTrue(TurnInPlace(self.s_Swerve, lambda: (Rotation2d.fromDegrees(-90)), translation, strafe, rotation, robotcentric))
+
+        #Intake Buttons
+        self.intakeOn.onTrue(self.s_Intake.setIntakeSpeed(Constants.IntakeConstants.kIntakeSpeed))
+        self.intakeOff.onTrue(self.s_Intake.stopIntake())
 
 
 

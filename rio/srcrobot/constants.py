@@ -156,9 +156,7 @@ class Constants:
         kSubwooferPivotAngle = 0.0
         kPodiumPivotAngle = 45.0
         kAmpPivotAngle = 90.0
-        kF = 0.0
-        kP = 0.0
-        kD = 0.0
-        kI = 0.0
-        shootSpeed = 50 # Placeholder until we calculate
-        
+
+    class IntakeConstants:
+        kIntakeMotorID = 0
+        kIntakeSpeed = 5.0
