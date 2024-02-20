@@ -1,12 +1,8 @@
-ARG IMAGE_NAME=nvcr.io/nvidia/isaac/ros:aarch64-ros2_humble_42f50fd45227c63eb74af1d69ddc2970
+ARG IMAGE_NAME=nvcr.io/nvidia/isaac/ros:aarch64-ros2_humble_b7e1ed6c02a6fa3c1c7392479291c035
+# ARG IMAGE_NAME=dustynv/ros:humble-ros-base-l4t-r35.1.0
 ARG ROS2_DIST=humble
 
 FROM ${IMAGE_NAME}
-
-RUN mkdir -p /root/isaac_ros_ws/src
-WORKDIR /root/isaac_ros_ws/src
-
-# RUN git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag.git
 
 WORKDIR /root/isaac_ros_ws
 
