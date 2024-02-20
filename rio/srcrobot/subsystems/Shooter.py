@@ -25,6 +25,3 @@ class Shooter(Subsystem):
     def shoot(self):
         self.topVelocityControl.velocity = Constants.ShooterConstants.shootSpeed
         self.bottomVelocityControl.velocity = -Constants.ShooterConstants.shootSpeed
-
-    
-
