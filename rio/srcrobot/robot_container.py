@@ -16,6 +16,7 @@ from commands.TeleopSwerve import TeleopSwerve
 from subsystems.Swerve import Swerve
 from subsystems.intake import Intake
 from subsystems.Arm import Arm
+from subsystems.Shooter import Shooter
 from commands.TurnInPlace import TurnInPlace
 
 from commands.SysId import DriveSysId
@@ -44,6 +45,7 @@ class RobotContainer:
     s_Swerve : Swerve = Swerve()
     s_Arm : Arm = Arm()
     s_Intake : Intake = Intake()
+    s_Shooter : Shooter = Shooter()
 
     #SysId
     driveSysId = DriveSysId(s_Swerve)
@@ -70,6 +72,7 @@ class RobotContainer:
         self.faceRight = self.driver.b()
         self.faceLeft = self.driver.x()
         self.resetToAbsoluteButton = self.driver.rightBumper()
+        self.shoot = self.driver.rightTrigger()  #made for testing
         self.intakeOn = self.driver.povRight()
         self.intakeOff = self.driver.povLeft()
         # Operator Controls
@@ -159,6 +162,12 @@ class RobotContainer:
         #Intake Buttons
         self.intakeOn.onTrue(self.s_Intake.setIntakeSpeed(Constants.IntakeConstants.kIntakeSpeed))
         self.intakeOff.onTrue(self.s_Intake.stopIntake())
+
+        #Shooter Buttons
+        self.shooterOff.onTrue(self.s_Shooter.stop())
+        self.shoot.onTrue(self.s_Shooter.shoot())
+        self.reverse.onTrue(self.s_Shooter.shootReverse())
+        
 
 
 
