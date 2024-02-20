@@ -1,5 +1,5 @@
 from commands2.subsystem import Subsystem
-from commands2.subsystem import Command
+# from commands2.subsystem import Command
 from commands2 import WaitCommand
 from commands2 import WaitUntilCommand
 import wpimath.filter
@@ -26,7 +26,7 @@ class Arm(Subsystem):
         self.kMotionMagicSlot = 0
         self.kVelocitySlot = 1
         self.MaxGravityFF = 0.26 # In percent output [1.0:1.0]
-        self.F = 0.2
+        self.kF = 0.2
         self.kPMotionMagic = 4.0
         self.kPVelocity = 0.8
         self.kIMotionMagic = 0.0
@@ -46,7 +46,7 @@ class Arm(Subsystem):
         self.isServoControl = False
         # The last requested servo target for target checking.
         self.lastServoTarget = 0.0
-        self.restingAtZero = False
+        self.kRestingAtZero = False
 
         self.armMotor.setSensorPhase(True)
         self.armMotor.config_kP(self.kMotionMagicSlot, self.kPMotionMagic)
@@ -106,7 +106,7 @@ class Arm(Subsystem):
         .finallyDo(lambda: self.setRestingAtZero(False))
     
     def setRestingAtZero(self, restAtZero):
-        self.restingAtZero = restAtZero
+        self.kRestingAtZero = restAtZero
 
     def hardSetEncoderToZero(self):
         self.armMotor.setSelectedSensorPosition(0)
@@ -138,7 +138,7 @@ class Arm(Subsystem):
             phoenix5.DemandType.ArbitraryFeedForward,
             self.calculateGravityFeedForward()))) \
         .finallyDo(lambda: self.setServoControl(False)) \
-        .withName("servoArmToTarget: " + degrees)
+        .withName("servoArmToTarget: " + str(degrees))
   
     def initializeServoArmToTarget(self, degrees):
         self.lastServoTarget = degrees
@@ -192,7 +192,7 @@ class Arm(Subsystem):
     #    @return true if under servo control and close, false otherwise.
     #    
     def isServoOnTarget(self):
-        return self.restingAtZero \
+        return self.kRestingAtZero \
             or (self.isServoControl \
                 and abs(self.lastServoTarget - self.getDegrees()) > self.kServoToleranceDegrees)
 
@@ -220,5 +220,5 @@ class Arm(Subsystem):
         currentCommand = self.getCurrentCommand()
         wpilib.SmartDashboard.putString("Arm command", currentCommand.getName() if currentCommand is not None else "<null>")
         wpilib.SmartDashboard.putNumber("Arm zeroing velocity", self.armMotor.getSelectedSensorVelocity(self.kVelocitySlot))
-        wpilib.SmartDashboard.putBoolean("Arm resting", self.restingAtZero)
+        wpilib.SmartDashboard.putBoolean("Arm resting", self.kRestingAtZero)
         wpilib.SmartDashboard.putBoolean("Servo control", self.isServoControl)

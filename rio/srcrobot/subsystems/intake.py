@@ -6,7 +6,7 @@ import math
 class Intake(Subsystem):
 
     def __init__(self):
-        self.intakeMotor = TalonFX(Constants.Intake.kIntakeMotorID)
+        self.intakeMotor = TalonFX(Constants.IntakeConstants.kIntakeMotorID)
         self.intakeMotor.configFactoryDefault()
 
     def setIntakeSpeed(self, speed: float):
