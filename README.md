@@ -1,3 +1,9 @@
+---
+---
+# IMPORTANT NOTICE:
+## This repository has been archived due to file size and history issues. Please see the new repository: [https://github.com/RoboEagles4828/rift2024](url)
+---
+---
 # roboeagles2024
 2024 FRC Robot
 
